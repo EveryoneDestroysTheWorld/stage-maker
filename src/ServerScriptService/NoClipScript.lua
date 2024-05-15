@@ -1,4 +1,6 @@
 --!strict
+-- NoClipScript.lua
+-- Written by Christian "Sudobeast" Toney
 game:GetService("ReplicatedStorage").TogglePlayerCollision.OnServerInvoke = function(player, mode)
 
   -- Let the player go through walls.
