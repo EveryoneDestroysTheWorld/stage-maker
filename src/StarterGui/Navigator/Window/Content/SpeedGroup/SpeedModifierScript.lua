@@ -1,10 +1,12 @@
 --!strict
 -- SpeedModifierScript.lua
 -- Written by Christian "Sudobeast" Toney 
+-- This script modifies the speed of the character.
+
 local defaultSpeed = 16;
 local player = game:GetService("Players").LocalPlayer;
-local currentSpeedTextBox = script.Parent.CanvasGroup.CurrentSpeed;
-local defaultSpeedButton = script.Parent.CanvasGroup.Default;
+local currentSpeedTextBox = script.Parent.CurrentSpeed;
+local defaultSpeedButton = script.Parent.Default;
 function changeDefaultSpeed(newSpeed: number): ()
   
   defaultSpeed = newSpeed;
