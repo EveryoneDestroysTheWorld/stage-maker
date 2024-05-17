@@ -29,25 +29,27 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
     -- Package the stage.
     ReplicatedStorage.Events.StageBuildDataSaveStarted:FireAllClients();
     type Vector3Serialization = {X: number; Y: number; Z: number};
-    local package: {{{
+    type PackageInstance = {{
       type: string;
       properties: {
         Color: string?;
-        CastShadow: boolean?;
-        Material: number?;
+        CastShadow: boolean;
+        Material: number;
         Size: Vector3Serialization;
         Position: Vector3Serialization;
         Orientation: Vector3Serialization;
+        Shape: number?;
         Name: string;
       }
-    }}} = {{}};
+    }};
+    local package: {{PackageInstance}} = {{}};
     local chunkIndex = 1;
     local skippedInstances = 0;
     for index, instance in ipairs(stageBuild:GetChildren()) do
-
+      
       if instance:IsA("BasePart") then 
-
-        local serializedInstance = {
+        
+        local packageInstance: PackageInstance = {
           type = "Part";
           properties = {
             Color = instance.Color:ToHex();
@@ -69,17 +71,19 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
               Z = instance.Size.Z;
             };
             Name = instance.Name;
+            Shape = if instance:IsA("Part") then instance.Shape.Value else nil;
           }
         };
-
+        
+        table.insert(package[chunkIndex], packageInstance);
+        
         if HttpService:JSONEncode(package[chunkIndex]):len() > 4194304 then
-
+          
+          table.remove(package[chunkIndex], #package[chunkIndex]);
           chunkIndex += 1;
-          package[chunkIndex] = {};
+          package[chunkIndex] = {packageInstance};
 
         end
-
-        table.insert(package[chunkIndex], serializedInstance);
 
       else
 
@@ -89,6 +93,14 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
 
       ReplicatedStorage.Events.StageBuildDataSaveProgressChanged:FireAllClients(1, index - skippedInstances, #stageBuild:GetChildren() - skippedInstances);
 
+    end;
+    
+    -- Serialize the package.
+    local serializedPackage = {};
+    for _, chunk in ipairs(package) do
+      
+      table.insert(serializedPackage, HttpService:JSONEncode(chunk));
+      
     end
 
     -- Save the stage into a DataStore.
@@ -98,8 +110,7 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
       ReplicatedStorage.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
 
     end)
-    stage:updateBuildData(package);
-    --onBuildDataUpdateProgressChanged:Disconnect();
+    stage:updateBuildData(serializedPackage);
 
     -- 
     print("Successfully saved the stage's build data.");
