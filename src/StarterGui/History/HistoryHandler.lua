@@ -5,7 +5,8 @@
 local ContextActionService = game:GetService("ContextActionService");
 local UserInputService = game:GetService("UserInputService");
 
-local eventListFrame = script.Parent.CanvasGroup.CanvasGroup.EventList;
+local window = script.Parent.Window;
+local eventListFrame = window.Content.EventList;
 local eventTemplate = eventListFrame.EventTemplate:Clone();
 eventListFrame.EventTemplate:Destroy();
 
@@ -22,7 +23,7 @@ local function updateHistory(): ()
     
   end
   
-  script.Parent.CanvasGroup.EmptyHistoryMessage.Visible = #historyStore.events == 0;
+  window.Content.EmptyHistoryMessage.Visible = #historyStore.events == 0;
   
   for index, event in ipairs(historyStore.events) do
     
@@ -36,7 +37,10 @@ local function updateHistory(): ()
     button.Label.Text = event.label;
     button.MouseButton1Click:Connect(function()
       
+      script.Parent.Processing:Play();
       historyStore:setPointerOffset(#historyStore.events - index);
+      script.Parent.Processing:Stop();
+      script.Parent.Done:Play();
       
     end);
     
