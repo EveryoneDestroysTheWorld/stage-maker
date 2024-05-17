@@ -25,7 +25,7 @@ type StageMetadataObject = {
   
   -- [Properties]
   -- The stage's unique ID.
-  ID: string;
+  ID: string?;
   
   -- A list of stage overrides.
   permissionOverrides: {PermissionOverride};
@@ -49,6 +49,7 @@ type StageMetadataObject = {
   updateBuildData: (self: StageMetadataObject, newData: NewDataParameter) -> ();
   updateMetadata: (self: StageMetadataObject, newData: NewDataParameter) -> ();
   delete: (self: StageMetadataObject) -> ();
+  verifyID: (self: StageMetadataObject) -> ();
   
   -- [Events]
   -- Fires when the stage metadata is updated.
@@ -76,13 +77,26 @@ for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDat
   
 end
 
+function Stage:verifyID(): ()
+  
+  -- Generate a stage ID.
+  if not self.ID then
+    
+    self.ID = "#3";
+    
+  end
+  
+end
+
 -- Edits the stage's metadata.
 function Stage:updateBuildData(newBuildData: {string}): ()
+  
+  self:verifyID();
   
   local datastore = DataStoreService:GetDataStore("StageBuildData");
   for index, chunk in ipairs(newBuildData) do
 
-    --datastore:SetAsync(`{self.ID}/{index}`, chunk);
+    datastore:SetAsync(`{self.ID}/{index}`, chunk);
     events.onBuildDataUpdateProgressChanged:Fire(index, #newBuildData);
 
   end
@@ -92,6 +106,8 @@ end
 
 -- Edits the stage's metadata.
 function Stage:updateMetadata(newData: NewDataParameter): ()
+
+  self:verifyID();
   
   events.onMetadataUpdate:Fire();
   
