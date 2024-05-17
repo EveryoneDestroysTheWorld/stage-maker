@@ -31,6 +31,8 @@ ReplicatedStorage.Events.StageBuildDataSaveCompleted.OnClientEvent:Connect(funct
   
   if shouldWarnPlayer then
     
+    warn("Untracked changes happened while saving. Consider saving again.");
+    shouldWarnPlayer = false;
     script.Parent.Enabled = true;
     script.Parent.Warning:Play();
     game:GetService("TweenService"):Create(script.Parent.CanvasGroup, TweenInfo.new(0.5), {GroupTransparency = 0}):Play();
