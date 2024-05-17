@@ -63,10 +63,11 @@ function HistoryStore:setPointerOffset(newPointerOffset: number): ()
   if newPointerOffset == self.pointerOffset then return; end;
   
   local increment = if newPointerOffset > self.pointerOffset then 1 else -1;
-  for i = self.pointerOffset, newPointerOffset, increment do
+  local isUndoing = increment == 1;
+  for i = self.pointerOffset - (if isUndoing then 0 else 1), newPointerOffset - (if isUndoing then 1 else 0), increment do
     
     local event = self.events[#self.events - i];
-    local method = if increment == 1 then "undo" else "redo";
+    local method = if isUndoing then "undo" else "redo";
     event[method](event);
     
   end
