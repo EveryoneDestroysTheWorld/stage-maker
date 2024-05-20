@@ -13,9 +13,6 @@ local saveCompleteSound = script.Parent.SaveComplete;
 
 local function sendSaveRequest(): ()
   
-  -- Ensure the player pressed CTRL+S instead of just "S".
-  if not UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) and not UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then return; end; 
-  
   -- Send a save request to the server.
   print("Asking the server to save the stage...");
   ReplicatedStorage.Functions.SaveStageBuildData:InvokeServer();
@@ -42,4 +39,15 @@ ReplicatedStorage.Events.StageBuildDataSaveCompleted.OnClientEvent:Connect(funct
   
 end)
 
-ContextActionService:BindActionAtPriority("Save", sendSaveRequest, false, 2, Enum.KeyCode.S);
+ContextActionService:BindActionAtPriority("Save", function()
+
+  -- Ensure the player pressed CTRL+S instead of just "S".
+  if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl) then
+    
+    sendSaveRequest();
+    
+  end;
+  
+end, false, 2, Enum.KeyCode.S);
+
+TextChatService.Commands.SaveCommand.Triggered:Connect(sendSaveRequest);
