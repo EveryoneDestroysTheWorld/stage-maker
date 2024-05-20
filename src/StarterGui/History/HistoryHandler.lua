@@ -4,6 +4,7 @@
 
 local ContextActionService = game:GetService("ContextActionService");
 local UserInputService = game:GetService("UserInputService");
+local TextChatService = game:GetService("TextChatService");
 
 local window = script.Parent.Window;
 local eventListFrame = window.Content.EventList;
@@ -82,3 +83,10 @@ script.AddToHistoryStore.OnInvoke = function(event: historyStore.HistoryEvent)
   historyStore:add(event)
   
 end
+
+local historyCommand = TextChatService.Commands.HistoryCommand;
+historyCommand.Triggered:Connect(function(_, text)
+
+  script.Parent.Enabled = not script.Parent.Enabled;
+
+end)
