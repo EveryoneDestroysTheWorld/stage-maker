@@ -46,7 +46,6 @@ local function updateHistory(): ()
     
     if historyStore.pointerOffset > eventIndex then
       
-      --button.BackgroundColor3 = Color3.fromRGB(189, 189, 189);
       buttonCanvasGroup.TransparencyPulse.Enabled = true;
       
     end
