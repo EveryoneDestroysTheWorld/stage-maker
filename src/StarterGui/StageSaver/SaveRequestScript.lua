@@ -6,6 +6,7 @@
 local ContextActionService = game:GetService("ContextActionService");
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local UserInputService = game:GetService("UserInputService");
+local TextChatService = game:GetService("TextChatService");
 
 local saveStartedSound = script.Parent.SaveStarted;
 local saveCompleteSound = script.Parent.SaveComplete;
@@ -22,8 +23,9 @@ local function sendSaveRequest(): ()
   
 end
 
-ReplicatedStorage.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(function()
-
+ReplicatedStorage.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(function(player)
+  
+  TextChatService.TextChannels.RBXGeneral:DisplaySystemMessage(`💾 <font color="#20b83e">{player.Name} saved the stage.</font>`);
   saveStartedSound:Play();
   
 end)
