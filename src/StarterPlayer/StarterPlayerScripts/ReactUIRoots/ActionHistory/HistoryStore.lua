@@ -3,13 +3,13 @@
 -- Written by Christian "Sudobeast" Toney
 
 export type HistoryEvent = {
-  label: string;
-  imageId: string;
+  description: string;
+  iconImage: string;
   redo: (self: HistoryEvent) -> ();
   undo: (self: HistoryEvent) -> ();
 }
 
-type HistoryStore = {
+export type HistoryStore = {
   -- Properties
   events: {HistoryEvent};
   pointerOffset: number;
@@ -34,7 +34,6 @@ local HistoryStore: HistoryStore = {
   onPointerOffsetChange = Instance.new("BindableEvent");
   onEventCapacityChange = Instance.new("BindableEvent");
 } :: HistoryStore;
-
 
 -- Adds an event to the HistoryStore.
 function HistoryStore:add(event: HistoryEvent): ()
