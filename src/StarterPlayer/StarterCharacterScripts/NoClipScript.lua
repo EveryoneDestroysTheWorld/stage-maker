@@ -2,6 +2,7 @@
 -- NoClipScript.lua
 -- Written by Christian "Sudobeast" Toney
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
+local ContextActionService = game:GetService("ContextActionService");
 
 local ActionHandlerStateChanged = Instance.new("BindableEvent");
 local player = game:GetService("Players").LocalPlayer;
@@ -23,39 +24,26 @@ ActionHandlerStateChanged.Event:Connect(function(alignOrientation: AlignOrientat
 
 end)
 
-local walkingButton = script.Parent.Walking;
-local flyingButton = script.Parent.Flying;
 local directionVelocity = nil;
 local alignOrientation = nil;
 
-local currentMode = "walking";
+local mode: "walking" | "flying" = "walking";
+local function checkJump(_, inputState)
+  
+  if inputState ~= Enum.UserInputState.Begin then return; end;
+    
+  mode = if mode == "walking" then "flying" else "walking";
 
-local function toggle(mode: "walking" | "flying"): ()
-  
-  -- Make sure we're changing modes.
-  if currentMode == mode then return; end;
-  currentMode = mode;
-  
-  -- Change the colors based on the selected button.
-  local selectedButton = if mode == "walking" then walkingButton else flyingButton; 
-  local unselectedButton = if selectedButton == walkingButton then flyingButton else walkingButton; 
-
-  unselectedButton.BackgroundColor3 = Color3.fromRGB(172, 172, 172);
-  unselectedButton.TextColor3 = Color3.fromRGB(72, 72, 72);
-  selectedButton.TextColor3 = Color3.new(0, 0, 0);
-  selectedButton.BackgroundColor3 = Color3.new(1, 1, 1);
-  
   -- Toggle collisions from the server side.
-  ReplicatedStorage.TogglePlayerCollision:InvokeServer(mode);
-  
+  ReplicatedStorage.Functions.TogglePlayerCollision:InvokeServer(mode);
+
   -- Check if the player wants to stand or fly.
-  local ContextActionService = game:GetService("ContextActionService");
   local humanoidRootPart = player.Character.HumanoidRootPart;
   if mode == "flying" then
 
     -- Disable player controls in favor of scriptable controls.
     (require(player.PlayerScripts.PlayerModule) :: any):GetControls():Disable();
-    
+
     directionVelocity = Instance.new("LinearVelocity");
     directionVelocity.Name = "Direction";
     directionVelocity.Attachment0 = humanoidRootPart:FindFirstChild("RootAttachment") :: Attachment;
@@ -74,13 +62,13 @@ local function toggle(mode: "walking" | "flying"): ()
     -- Stop all player animation tracks.
     local humanoid = player.Character:FindFirstChildOfClass("Humanoid");
     if humanoid then
-      
+
       for _, animationTrack in humanoid:GetPlayingAnimationTracks() do
-        
+
         animationTrack:Stop();
-        
+
       end
-      
+
     end
 
     local currentDirections = {};
@@ -109,7 +97,6 @@ local function toggle(mode: "walking" | "flying"): ()
         end
 
         directionVelocity.VectorVelocity = Vector3.new(forceX, 0, forceZ);
-        ReplicatedStorage.MoveFlyingPlayer:InvokeServer(direction, inputState == Enum.UserInputState.Begin);
 
       end;
 
@@ -117,13 +104,13 @@ local function toggle(mode: "walking" | "flying"): ()
     ContextActionService:BindAction("FlyingDirection", handleAction, false, Enum.KeyCode.W, Enum.KeyCode.A, Enum.KeyCode.S, Enum.KeyCode.D);
 
   else
-    
+
     -- Stop monitoring the player's orientation.
     if cframeEvent then
-      
+
       cframeEvent:Disconnect();
       cframeEvent = nil;
-      
+
     end
     monitoring = false;
 
@@ -143,17 +130,7 @@ local function toggle(mode: "walking" | "flying"): ()
     (require(player.PlayerScripts.PlayerModule) :: any):GetControls():Enable();
 
   end
-
+  
 end
 
-flyingButton.MouseButton1Click:Connect(function()
-
-  toggle("flying");
-
-end)
-
-walkingButton.MouseButton1Click:Connect(function()
-
-  toggle("walking");
-
-end)
+ContextActionService:BindActionAtPriority("ToggleFlying", checkJump, false, 1, Enum.KeyCode.F);
