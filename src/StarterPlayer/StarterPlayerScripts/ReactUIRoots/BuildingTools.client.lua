@@ -26,7 +26,7 @@ local function BuildingToolsContainer()
   local selectedParts, setSelectedParts = React.useState({});
   React.useEffect(function()
     
-    ReplicatedStorage.Shared.Events.SelectedPartsChanged.Event:Connect(function(newSelectedParts)
+    ReplicatedStorage.Shared.Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
 
       setSelectedParts(selectedParts);
 

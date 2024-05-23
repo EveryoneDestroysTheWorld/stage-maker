@@ -8,16 +8,25 @@ type PartColorModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
 
 local function PartColorModificationWindow(props: PartColorModificationWindowProps)
 
-  local currentColor3, setCurrentColor3 = React.useState(Color3.new());
+  local currentColor3, setCurrentColor3 = React.useState(nil);
   local colors, setColors = React.useState({});
 
   React.useEffect(function()
 
-    for _, part in ipairs(props.parts) do
+    local firstPart = props.parts[1];
+    if currentColor3 then
 
-      part.Color = currentColor3;
+      for _, part in ipairs(props.parts) do
 
-    end
+        part.Color = currentColor3;
+  
+      end
+
+    elseif firstPart then
+
+      setCurrentColor3(firstPart.Color);
+
+    end;
 
   end, {currentColor3});
 

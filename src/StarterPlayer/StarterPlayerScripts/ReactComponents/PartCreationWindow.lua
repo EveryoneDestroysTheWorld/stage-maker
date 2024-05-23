@@ -78,6 +78,7 @@ local function PartCreationWindow(props: PartCreationWindowProps)
 
     return function()
 
+      previewPart:Destroy();
       shapeChangeEvent:Disconnect();
       heartbeatEvent:Disconnect();
       mouseButton1DownEvent:Disconnect();
