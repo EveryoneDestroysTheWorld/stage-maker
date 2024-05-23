@@ -5,11 +5,10 @@ local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 local NumberInput = require(script.Parent.Parent.ReactComponents.NumberInput);
 
-type PartMaterialModificationWindowProps = {handle: ScreenGui};
+type PartMaterialModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
 
 local function PartMaterialModificationWindow(props: PartMaterialModificationWindowProps)
   
-  local parts, setParts = React.useState({});
   local selectedOptionIndex, setSelectedOptionIndex = React.useState(nil);
   
   local dropdownOptions = {};
@@ -20,7 +19,7 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       onClick = function()
         
         setSelectedOptionIndex(index);
-        for _, part in ipairs(parts) do
+        for _, part in ipairs(props.parts) do
           
           part.Material = material;
           
@@ -31,43 +30,34 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
     
   end;
 
-  local isShadowEnabled, setIsShadowEnabled = React.useState(false);
-  local transparency, setTransparency = React.useState(nil);
-  local reflectance, setReflectance = React.useState(nil);
+  local isShadowEnabled: boolean, setIsShadowEnabled = React.useState(false);
+  local transparency: number?, setTransparency = React.useState(nil);
+  local reflectance: number?, setReflectance = React.useState(nil);
   React.useEffect(function()
-    
-    game:GetService("ReplicatedStorage").Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
-      
-      setParts(selectedParts);
-      if selectedParts[1] then
 
-        setSelectedOptionIndex(table.find(Enum.Material:GetEnumItems(), selectedParts[1].Material));
-        setIsShadowEnabled(selectedParts[1].CastShadow);
-        setReflectance(selectedParts[1].Reflectance);
-        setTransparency(selectedParts[1].Transparency);
-        
-      else
-        
-        setSelectedOptionIndex();
-        setIsShadowEnabled(false);
-        setReflectance();
-        setTransparency();
-        
-      end
+    local firstPart = props.parts[1];
+    if firstPart then
+
+      setSelectedOptionIndex(table.find(Enum.Material:GetEnumItems(), firstPart.Material));
+      setIsShadowEnabled(firstPart.CastShadow);
+      setReflectance(firstPart.Reflectance);
+      setTransparency(firstPart.Transparency);
       
-    end)
+    else
+      
+      setSelectedOptionIndex();
+      setIsShadowEnabled(false);
+      setReflectance();
+      setTransparency();
+      
+    end
     
-  end, {});
-  
+  end, {props.parts});
   
   return React.createElement(Window, {
     name = "Material"; 
     size = UDim2.new(0, 250, 0, 135); 
-    onCloseButtonClick = function()
-
-      props.handle.Enabled = false;
-
-    end
+    onCloseButtonClick = props.onClose;
   }, {
     React.createElement(Dropdown, {selectedIndex = selectedOptionIndex; options = dropdownOptions});
     React.createElement(Checkbox, {
@@ -75,10 +65,11 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       isChecked = isShadowEnabled;
       onClick = function()
         
-        if parts[1] then
+        local firstPart = props.parts[1];
+        if firstPart then
           
-          local castShadow = not parts[1].CastShadow;
-          for _, part in ipairs(parts) do
+          local castShadow = not firstPart.CastShadow;
+          for _, part in ipairs(props.parts) do
             
             part.CastShadow = castShadow;
             
@@ -94,16 +85,17 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       value = transparency;
       onChange = function(newValue)
         
-        if parts[1] then
+        local firstPart = props.parts[1];
+        if firstPart then
           
           newValue = if newValue > 0.8 then 0.8 else newValue;
           
-          for _, part in ipairs(parts) do
+          for _, part in ipairs(props.parts) do
 
             part.Transparency = newValue;
 
           end
-          setTransparency(parts[1].Transparency);
+          setTransparency(firstPart.Transparency);
           
         end
         
@@ -114,14 +106,15 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       reflectance = reflectance;
       onChange = function(newValue)
 
-        if parts[1] then
+        local firstPart = props.parts[1];
+        if firstPart then
 
-          for _, part in ipairs(parts) do
+          for _, part in ipairs(props.parts) do
 
             part.Reflectance = newValue;
 
           end
-          setReflectance(parts[1].Reflectance);
+          setReflectance(firstPart.Reflectance);
 
         end
 
