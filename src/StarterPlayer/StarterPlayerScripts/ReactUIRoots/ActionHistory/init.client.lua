@@ -55,6 +55,7 @@ local function ActionHistoryWindow()
     FontFace = Font.fromId(11702779517);
     Position = UDim2.new(0.5, -100, 0.5, -30);
     Size = UDim2.new(0, 200, 0, 30);
+    TextColor3 = Color3.new(1, 1, 1);
     Text = "Nice and squeaky clean. Let's have fun!";
     Visible = #events == 0;
   });
@@ -67,7 +68,7 @@ local function ActionHistoryWindow()
       handle.Enabled = false;
 
     end
-  }, {ActionHistoryEventList});
+  }, {ActionHistoryEventList, EmptyHistoryMessage});
   
 end
 

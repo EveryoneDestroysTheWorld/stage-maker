@@ -52,39 +52,39 @@ local function BuildingToolsContainer()
         {
           name = "MoveButton";
           iconImage = "rbxassetid://17547020218";
-          onClick = function() setSelectedWindow(PartOrientationModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartOrientationModificationWindow, globalProps)); end;
         }, {
           name = "ResizeButton";
           iconImage = "rbxassetid://17547037235";
-          onClick = function() setSelectedWindow(PartOrientationModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartOrientationModificationWindow, globalProps)); end;
         }, {
           name = "OrientationButton";
           iconImage = "rbxassetid://17547019914";
-          onClick = function() setSelectedWindow(PartOrientationModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartOrientationModificationWindow, globalProps)); end;
         }, {
           name = "ColorButton";
           iconImage = "rbxassetid://17550945994";
-          onClick = function() setSelectedWindow(React.createElement(PartColorModificationWindow, globalProps));end;
+          onClick = function() setSelectedWindow(React.createElement(PartColorModificationWindow, globalProps)); end;
         }, {
           name = "MaterialButton";
           iconImage = "rbxassetid://17551063892";
-          onClick = function() setSelectedWindow(PartMaterialModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartMaterialModificationWindow, globalProps)); end;
         }, {
           name = "AnchorButton";
           iconImage = "rbxassetid://17551033481";
-          onClick = function() setSelectedWindow(PartAnchorModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartAnchorModificationWindow, globalProps)); end;
         }, {
           name = "CollisionButton";
           iconImage = "rbxassetid://17551046771";
-          onClick = function() setSelectedWindow(PartCollisionModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartCollisionModificationWindow, globalProps)); end;
         }, {
           name = "SurfaceButton";
           iconImage = "rbxassetid://17550959976";
-          onClick = function() setSelectedWindow(PartSurfaceModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartSurfaceModificationWindow, globalProps)); end;
         }, {
           name = "DurabilityButton";
           iconImage = "rbxassetid://17550968289";
-          onClick = function() setSelectedWindow(PartDurabilityModificationWindow) end;
+          onClick = function() setSelectedWindow(React.createElement(PartDurabilityModificationWindow, globalProps)); end;
         }
       }
     }
