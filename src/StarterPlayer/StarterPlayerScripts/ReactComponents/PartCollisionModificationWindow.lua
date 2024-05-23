@@ -1,10 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
-
+type PartCollisionModificationWindowProps = {handle: ScreenGui};
 
 local function PartCollisionModificationWindow(props: PartCollisionModificationWindowProps)
 
@@ -67,9 +66,10 @@ local function PartCollisionModificationWindow(props: PartCollisionModificationW
       isChecked = canCollide;
       onClick = function()
 
-        if parts[1] then
+        local possiblePart = parts[1];
+        if possiblePart then
 
-          local canCollide = not parts[1].CanCollide;
+          local canCollide = not possiblePart.CanCollide;
           for _, part in ipairs(parts) do
 
             part.CanCollide = canCollide;

@@ -35,7 +35,7 @@ local function checkJump(_, inputState)
   mode = if mode == "walking" then "flying" else "walking";
 
   -- Toggle collisions from the server side.
-  ReplicatedStorage.Functions.TogglePlayerCollision:InvokeServer(mode);
+  ReplicatedStorage.Shared.Functions.TogglePlayerCollision:InvokeServer(mode);
 
   -- Check if the player wants to stand or fly.
   local humanoidRootPart = player.Character.HumanoidRootPart;

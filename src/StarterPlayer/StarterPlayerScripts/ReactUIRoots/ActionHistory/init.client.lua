@@ -3,8 +3,8 @@ local ContextActionService = game:GetService("ContextActionService");
 local UserInputService = game:GetService("UserInputService");
 local TextChatService = game:GetService("TextChatService");
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
+local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local ActionHistoryEventList = require(script.Parent.Parent.ReactComponents.ActionHistoryEventList);
 

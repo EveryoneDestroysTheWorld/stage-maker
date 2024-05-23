@@ -3,7 +3,7 @@ local shouldWarnPlayer = false;
 
 local events = {};
 
-ReplicatedStorage.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(function()
+ReplicatedStorage.Shared.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(function()
   
   table.insert(events, workspace.Stage.ChildRemoved:Connect(function()
     
@@ -19,7 +19,7 @@ ReplicatedStorage.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(functio
   
 end);
 
-ReplicatedStorage.Events.StageBuildDataSaveCompleted.OnClientEvent:Connect(function()
+ReplicatedStorage.Shared.Events.StageBuildDataSaveCompleted.OnClientEvent:Connect(function()
   
   for _, event in ipairs(events) do
 
@@ -56,7 +56,7 @@ end
 script.Parent.CanvasGroup.CanvasGroup.Yes.MouseButton1Click:Connect(function()
   
   closeGUI();
-  ReplicatedStorage.Functions.SaveStageBuildData:InvokeServer();
+  ReplicatedStorage.Shared.Functions.SaveStageBuildData:InvokeServer();
   
 end)
 

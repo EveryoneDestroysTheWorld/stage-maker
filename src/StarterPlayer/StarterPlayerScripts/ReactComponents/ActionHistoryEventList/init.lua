@@ -1,7 +1,6 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local ActionHistoryEventItem = require(script.Parent.ActionHistoryEventItem);
 local HistoryStore = require(script.Parent.Parent.ReactUIRoots.ActionHistory.HistoryStore);
 
@@ -51,7 +50,7 @@ local function ActionHistoryEventList(props: ActionHistoryEventListProps)
       PaddingLeft = UDim.new(0, 5);
       PaddingRight = UDim.new(0, 5);
       PaddingTop = UDim.new(0, 5);
-    }) :: React.ReactElement,
+    }),
     eventItems
   });
 

@@ -1,9 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
+local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local PartMaterialModificationWindow = require(script.Parent.Parent.ReactComponents.PartMaterialModificationWindow);
 local PartOrientationModificationWindow = require(script.Parent.Parent.ReactComponents.PartOrientationModificationWindow);
 local PartCreationWindow = require(script.Parent.Parent.ReactComponents.PartCreationWindow);
+local PartColorModificationWindow = require(script.Parent.Parent.ReactComponents.PartColorModificationWindow);
 local PartAnchorModificationWindow = require(script.Parent.Parent.ReactComponents.PartAnchorModificationWindow);
 local PartCollisionModificationWindow = require(script.Parent.Parent.ReactComponents.PartCollisionModificationWindow);
 local PartDurabilityModificationWindow = require(script.Parent.Parent.ReactComponents.PartDurabilityModificationWindow);
@@ -14,7 +15,7 @@ local handle = Instance.new("ScreenGui");
 handle.Name = "BuildingTools";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = game.Players.LocalPlayer.PlayerGui;
-handle.Enabled = false;
+handle.Enabled = true;
 
 local root = ReactRoblox.createRoot(handle);
 
@@ -25,7 +26,7 @@ local function BuildingToolsContainer()
   local selectedParts, setSelectedParts = React.useState({});
   React.useEffect(function()
     
-    ReplicatedStorage.Events.SelectedPartsChanged.Event:Connect(function(newSelectedParts)
+    ReplicatedStorage.Shared.Events.SelectedPartsChanged.Event:Connect(function(newSelectedParts)
 
       setSelectedParts(selectedParts);
 
@@ -67,20 +68,19 @@ local function BuildingToolsContainer()
           iconImage = "rbxassetid://17551046771";
           onClick = function() setSelectedWindow(PartCollisionModificationWindow) end;
         }, {
-          name = "DurabilityButton";
-          iconImage = "rbxassetid://17550968289";
-          onClick = function() setSelectedWindow(PartDurabilityModificationWindow) end;
-        }, {
           name = "SurfaceButton";
           iconImage = "rbxassetid://17550959976";
           onClick = function() setSelectedWindow(PartSurfaceModificationWindow) end;
-        }, 
+        }, {
+          name = "DurabilityButton";
+          iconImage = "rbxassetid://17550968289";
+          onClick = function() setSelectedWindow(PartDurabilityModificationWindow) end;
+        }
       }
     }
   };
   
-  
-  return React.createElement(React.Fragment, {}, {
+  return React.createElement(React.StrictMode, {}, {
     React.createElement(BuildingToolsSelector, {sections = sections});
     selectedWindow;
   });

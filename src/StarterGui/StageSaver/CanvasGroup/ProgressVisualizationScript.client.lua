@@ -15,7 +15,7 @@ script.Parent.GroupTransparency = 1;
 local saveStartTime;
 
 local lastTotal = 0;
-ReplicatedStorage.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(function()
+ReplicatedStorage.Shared.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(function()
   
   saveStartTime = os.time();
   lastTotal = 0;
@@ -35,7 +35,7 @@ ReplicatedStorage.Events.StageBuildDataSaveStarted.OnClientEvent:Connect(functio
 end)
 
 local saveStartedSound = script.Parent.Parent.SaveStarted;
-ReplicatedStorage.Events.StageBuildDataSaveProgressChanged.OnClientEvent:Connect(function(step: number, current: number, total: number)
+ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged.OnClientEvent:Connect(function(step: number, current: number, total: number)
   
   local progressBar = script.Parent.LoadingBar:FindFirstChild(if step == 1 then "Packaging" else "Saving");
   
@@ -51,7 +51,7 @@ ReplicatedStorage.Events.StageBuildDataSaveProgressChanged.OnClientEvent:Connect
   
 end);
 
-ReplicatedStorage.Events.StageBuildDataSaveCompleted.OnClientEvent:Connect(function()
+ReplicatedStorage.Shared.Events.StageBuildDataSaveCompleted.OnClientEvent:Connect(function()
 
   if saveStartedSound.Playing and saveStartedSound.TimePosition <= 3 then
 

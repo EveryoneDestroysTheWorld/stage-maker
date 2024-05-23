@@ -10,7 +10,7 @@ local HttpService = game:GetService("HttpService");
 
 local isSaving = false;
 
-ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
+ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(player)
 
   -- Verify that the player has permission to save the stage.
   assert(player, "You don't have permission to save this stage.");
@@ -27,7 +27,7 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
     assert(stageBuild and stageBuild:IsA("Model"), "Couldn't find Stage the Workspace.");
 
     -- Package the stage.
-    ReplicatedStorage.Events.StageBuildDataSaveStarted:FireAllClients(player);
+    ReplicatedStorage.Shared.Events.StageBuildDataSaveStarted:FireAllClients(player);
     type Vector3Serialization = {X: number; Y: number; Z: number};
     type PackageInstance = {{
       type: string;
@@ -91,7 +91,7 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
 
       end;
 
-      ReplicatedStorage.Events.StageBuildDataSaveProgressChanged:FireAllClients(1, index - skippedInstances, #stageBuild:GetChildren() - skippedInstances);
+      ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged:FireAllClients(1, index - skippedInstances, #stageBuild:GetChildren() - skippedInstances);
 
     end;
     
@@ -107,14 +107,14 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
     local onBuildDataUpdateProgressChanged;
     onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged:Connect(function(current, total)
 
-      ReplicatedStorage.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
+      ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
 
     end)
     stage:updateBuildData(serializedPackage);
 
     -- 
     print("Successfully saved the stage's build data.");
-    ReplicatedStorage.Events.StageBuildDataSaveCompleted:FireAllClients(player);
+    ReplicatedStorage.Shared.Events.StageBuildDataSaveCompleted:FireAllClients(player);
     
   end);
   

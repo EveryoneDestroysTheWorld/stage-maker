@@ -1,9 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
-local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
-local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
 type PartOrientationModificationWindowProps = {handle: ScreenGui};
 
@@ -14,6 +11,7 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
   local textBoxes = {};
   for i = 1, 3 do
     
+    local possiblePart = parts[1];
     table.insert(textBoxes, React.createElement("TextBox", {
       LayoutOrder = i;
       Name = ({"OrientationX", "OrientationY", "OrientationZ"})[i];
@@ -24,7 +22,7 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
       TextColor3 = Color3.new(1, 1, 1);
       FontFace = Font.fromId(11702779517);
       TextSize = 14;
-      Text = if parts[1] then parts[1].Orientation[({"X", "Y", "Z"})[i]] else "";
+      Text = if possiblePart then possiblePart.Orientation[({"X", "Y", "Z"})[i]] else "";
       [React.Event.InputEnded] = function(self)
 
         local requestedValue = tonumber(self.Text);

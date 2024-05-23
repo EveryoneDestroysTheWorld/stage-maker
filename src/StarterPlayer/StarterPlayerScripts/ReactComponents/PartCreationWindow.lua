@@ -3,8 +3,7 @@
 -- This script helps the player visualize a part before they place it.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
 
@@ -67,20 +66,20 @@ local function PartCreationWindow(props: PartCreationWindowProps)
             CFrame = previewPart.CFrame;
             Shape = previewPart.Shape;
           };
-          local partID = ReplicatedStorage.Functions.CreatePart:InvokeServer(originalPartData);
-          local selectedPartsChanged = ReplicatedStorage.Events.SelectedPartsChanged;
+          local partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
+          local selectedPartsChanged = ReplicatedStorage.Shared.Events.SelectedPartsChanged;
           selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
           ReplicatedStorage.Client.Functions.AddToHistoryStore:Invoke({
             description = "Created <b>Part</b>";
             undo = function()
 
-              ReplicatedStorage.Functions.DestroyPart:InvokeServer(partID);
+              ReplicatedStorage.Shared.Functions.DestroyPart:InvokeServer(partID);
               selectedPartsChanged:Fire({});
 
             end,
             redo = function()
 
-              partID = ReplicatedStorage.Functions.CreatePart:InvokeServer(originalPartData);
+              partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
               selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
 
             end

@@ -1,12 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
-local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 local HexColorInput = require(script.Parent.Parent.ReactComponents.HexColorInput);
 local ColorPalette = require(script.Parent.Parent.ReactComponents.ColorPalette);
 
-local function PartColorModificationWindow(props: PartCollisionModificationWindowProps)
+type PartColorModificationWindowProps = {handle: ScreenGui};
+
+local function PartColorModificationWindow(props: PartColorModificationWindowProps)
 
   local parts, setParts = React.useState({});
   local currentColor3, setCurrentColor3 = React.useState(Color3.new());
@@ -58,7 +58,7 @@ local function PartColorModificationWindow(props: PartCollisionModificationWindo
     size = UDim2.new(0, 250, 0, 135);
     onCloseButtonClick = function()
 
-      handle.Enabled = false;
+      props.handle.Enabled = false;
 
     end
   }, {HexColorInputWithProps, ColorPaletteWithProps});

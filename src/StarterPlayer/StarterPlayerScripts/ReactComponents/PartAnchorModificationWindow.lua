@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
@@ -67,9 +66,10 @@ local function PartAnchorModificationWindow(props: PartAnchorModificationWindowP
       isChecked = isAnchored;
       onClick = function()
         
-        if parts[1] then
+        local possiblePart = parts[1];
+        if possiblePart then
           
-          local isAnchored = not parts[1].Anchored;
+          local isAnchored = not possiblePart.Anchored;
           for _, part in ipairs(parts) do
             
             part.Anchored = isAnchored;

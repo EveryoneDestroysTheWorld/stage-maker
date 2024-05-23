@@ -1,5 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local ColorPaletteButton = require(script.Parent.ColorPaletteButton);
 
 type ColorPaletteProps = {

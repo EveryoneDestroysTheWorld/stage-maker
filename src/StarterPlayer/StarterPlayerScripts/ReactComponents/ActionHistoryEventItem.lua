@@ -1,7 +1,6 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local TweenService = game:GetService("TweenService");
 
 type ActionHistoryEventItemProps = {
@@ -14,7 +13,7 @@ type ActionHistoryEventItemProps = {
 
 local function ActionHistoryEventItem(props: ActionHistoryEventItemProps)
   
-  local button: React.ReactElement = React.createElement("TextButton", {
+  local button = React.createElement("TextButton", {
     Text = "";
     BackgroundTransparency = 1;
     Size = UDim2.new(1, 0, 1, 0);
@@ -29,7 +28,7 @@ local function ActionHistoryEventItem(props: ActionHistoryEventItemProps)
     React.createElement("UIPadding", {
       PaddingLeft = UDim.new(0, 5);
       PaddingRight = UDim.new(0, 5);
-    }) :: React.ReactElement;
+    });
     React.createElement("ImageLabel", {
       Name = "Icon";
       Size = UDim2.new(0, 25, 0, 25);
@@ -40,7 +39,7 @@ local function ActionHistoryEventItem(props: ActionHistoryEventItemProps)
       React.createElement("UICorner", {
         CornerRadius = UDim.new(1, 0);
       });
-    }) :: React.ReactElement;
+    });
     React.createElement("TextLabel", {
       Name = "Description";
       BackgroundTransparency = 1;
@@ -52,7 +51,7 @@ local function ActionHistoryEventItem(props: ActionHistoryEventItemProps)
       TextSize = 14;
       RichText = true;
       LayoutOrder = 2;
-    }) :: React.ReactElement;
+    });
   });
   
   local canvasGroupRef = React.createRef();
@@ -114,8 +113,8 @@ local function ActionHistoryEventItem(props: ActionHistoryEventItemProps)
       PaddingLeft = UDim.new(0, 5);
       PaddingRight = UDim.new(0, 5);
       PaddingTop = UDim.new(0, 5);
-    }) :: React.ReactElement,
-    React.createElement("UICorner", {CornerRadius = UDim.new(0, 5)}) :: React.ReactElement,
+    }),
+    React.createElement("UICorner", {CornerRadius = UDim.new(0, 5)}),
     button
   });
   

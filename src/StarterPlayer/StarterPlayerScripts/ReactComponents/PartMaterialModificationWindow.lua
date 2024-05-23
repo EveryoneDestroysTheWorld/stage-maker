@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local React = require(ReplicatedStorage.Packages.ReactLua.React);
-local ReactRoblox = require(ReplicatedStorage.Packages.ReactLua.ReactRoblox);
+local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
