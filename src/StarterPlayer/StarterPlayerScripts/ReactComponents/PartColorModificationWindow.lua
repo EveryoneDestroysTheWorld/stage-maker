@@ -4,38 +4,22 @@ local Window = require(script.Parent.Parent.ReactComponents.Window);
 local HexColorInput = require(script.Parent.Parent.ReactComponents.HexColorInput);
 local ColorPalette = require(script.Parent.Parent.ReactComponents.ColorPalette);
 
-type PartColorModificationWindowProps = {handle: ScreenGui};
+type PartColorModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
 
 local function PartColorModificationWindow(props: PartColorModificationWindowProps)
 
-  local parts, setParts = React.useState({});
   local currentColor3, setCurrentColor3 = React.useState(Color3.new());
   local colors, setColors = React.useState({});
 
   React.useEffect(function()
 
-    for _, part in ipairs(parts) do
+    for _, part in ipairs(props.parts) do
 
       part.Color = currentColor3;
 
     end
 
   end, {currentColor3});
-
-  React.useEffect(function()
-
-    game:GetService("ReplicatedStorage").Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
-
-      setParts(selectedParts);
-      if selectedParts[1] then
-
-        setCurrentColor3(selectedParts[1].Color);
-
-      end
-
-    end)
-
-  end, {});
 
   local HexColorInputWithProps = React.createElement(HexColorInput, {
     color3 = currentColor3;
@@ -56,11 +40,7 @@ local function PartColorModificationWindow(props: PartColorModificationWindowPro
   return React.createElement(Window, {
     name = "Color";
     size = UDim2.new(0, 250, 0, 135);
-    onCloseButtonClick = function()
-
-      props.handle.Enabled = false;
-
-    end
+    onCloseButtonClick = props.onClose;
   }, {HexColorInputWithProps, ColorPaletteWithProps});
 
 end

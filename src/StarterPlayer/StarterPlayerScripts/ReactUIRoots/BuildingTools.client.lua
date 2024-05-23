@@ -34,7 +34,8 @@ local function BuildingToolsContainer()
     
   end, {});
   
-  local selectedWindow, setSelectedWindow = React.useState(nil);
+  local selectedWindow, setSelectedWindow = React.useState(React.createElement(React.Fragment));
+  local globalProps = {parts = selectedParts; onClose = function() setSelectedWindow(React.Fragment) end};
   
   local sections = {
     {
@@ -42,23 +43,32 @@ local function BuildingToolsContainer()
       buttons = {{
         name = "CreateButton";
         iconImage = "rbxassetid://17546996412";
-        onClick = function() setSelectedWindow(PartCreationWindow) end;
+        onClick = function() setSelectedWindow(React.createElement(PartCreationWindow, globalProps)); end;
       }}
     }, {
       name = "ModificationTools";
+      disabled = not selectedParts[1];
       buttons = {
         {
-          name = "ColorButton";
-          iconImage = "rbxassetid://17550945994";
-          onClick = function() setSelectedWindow(PartColorModificationWindow) end;
+          name = "MoveButton";
+          iconImage = "rbxassetid://17547020218";
+          onClick = function() setSelectedWindow(PartOrientationModificationWindow) end;
         }, {
-          name = "MaterialButton";
-          iconImage = "rbxassetid://17551063892";
-          onClick = function() setSelectedWindow(PartMaterialModificationWindow) end;
+          name = "ResizeButton";
+          iconImage = "rbxassetid://17547037235";
+          onClick = function() setSelectedWindow(PartOrientationModificationWindow) end;
         }, {
           name = "OrientationButton";
           iconImage = "rbxassetid://17547019914";
           onClick = function() setSelectedWindow(PartOrientationModificationWindow) end;
+        }, {
+          name = "ColorButton";
+          iconImage = "rbxassetid://17550945994";
+          onClick = function() setSelectedWindow(React.createElement(PartColorModificationWindow, globalProps));end;
+        }, {
+          name = "MaterialButton";
+          iconImage = "rbxassetid://17551063892";
+          onClick = function() setSelectedWindow(PartMaterialModificationWindow) end;
         }, {
           name = "AnchorButton";
           iconImage = "rbxassetid://17551033481";

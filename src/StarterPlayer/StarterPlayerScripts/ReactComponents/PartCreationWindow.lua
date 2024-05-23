@@ -7,13 +7,13 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
 
-type PartCreationWindowProps = {handle: ScreenGui};
+type PartCreationWindowProps = {onClose: () -> ()};
 
 local function PartCreationWindow(props: PartCreationWindowProps)
   
-  local previewPart, setPreviewPart = React.useState(Instance.new("Part"));
+  local previewPart = React.useState(Instance.new("Part"));
 
-  local selectedOptionIndex, setSelectedOptionIndex = React.useState(nil);
+  local selectedOptionIndex, setSelectedOptionIndex = React.useState(table.find(Enum.PartType:GetEnumItems(), previewPart.Shape));
   React.useEffect(function()
 
     local mouse = game:GetService("Players").LocalPlayer:GetMouse();
@@ -22,15 +22,15 @@ local function PartCreationWindow(props: PartCreationWindowProps)
     previewPart.Transparency = 0.4;
     previewPart.CanQuery = false;
     previewPart.Anchored = true;
-    previewPart:GetPropertyChangedSignal("Shape"):Connect(function()
+    local shapeChangeEvent = previewPart:GetPropertyChangedSignal("Shape"):Connect(function()
       
       setSelectedOptionIndex(table.find(Enum.PartType:GetEnumItems(), previewPart.Shape));
       
     end)
     
-    game:GetService("RunService").Heartbeat:Connect(function()
+    local heartbeatEvent = game:GetService("RunService").Heartbeat:Connect(function()
 
-      if props.handle.Enabled and mouse.Target then 
+      if mouse.Target then 
 
         -- Find the direction
         previewPart.Position = mouse.Hit.Position + Vector3.new(
@@ -49,47 +49,40 @@ local function PartCreationWindow(props: PartCreationWindowProps)
     end);
     
     -- Create a part when the player presses the down button.
-    local mouseButton1DownEvent;
-    props.handle:GetPropertyChangedSignal("Enabled"):Connect(function()
+    local mouseButton1DownEvent = mouse.Button1Down:Connect(function()
 
-      if mouseButton1DownEvent then
+      local originalPartData = {
+        CFrame = previewPart.CFrame;
+        Shape = previewPart.Shape;
+      };
+      local partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
+      local selectedPartsChanged = ReplicatedStorage.Shared.Events.SelectedPartsChanged;
+      selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
+      ReplicatedStorage.Client.Functions.AddToHistoryStore:Invoke({
+        description = "Created <b>Part</b>";
+        undo = function()
 
-        mouseButton1DownEvent:Disconnect();
+          ReplicatedStorage.Shared.Functions.DestroyPart:InvokeServer(partID);
+          selectedPartsChanged:Fire({});
 
-      end
+        end,
+        redo = function()
 
-      if props.handle.Enabled then
-
-        mouseButton1DownEvent = mouse.Button1Down:Connect(function()
-
-          local originalPartData = {
-            CFrame = previewPart.CFrame;
-            Shape = previewPart.Shape;
-          };
-          local partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
-          local selectedPartsChanged = ReplicatedStorage.Shared.Events.SelectedPartsChanged;
+          partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
           selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
-          ReplicatedStorage.Client.Functions.AddToHistoryStore:Invoke({
-            description = "Created <b>Part</b>";
-            undo = function()
 
-              ReplicatedStorage.Shared.Functions.DestroyPart:InvokeServer(partID);
-              selectedPartsChanged:Fire({});
+        end
+      })
 
-            end,
-            redo = function()
+    end);
 
-              partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
-              selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
+    return function()
 
-            end
-          })
+      shapeChangeEvent:Disconnect();
+      heartbeatEvent:Disconnect();
+      mouseButton1DownEvent:Disconnect();
 
-        end);
-
-      end
-
-    end)
+    end;
     
   end, {});
 
@@ -112,7 +105,7 @@ local function PartCreationWindow(props: PartCreationWindowProps)
     size = UDim2.new(0, 250, 0, 165); 
     onCloseButtonClick = function()
 
-      props.handle.Enabled = false;
+      props.onClose();
 
     end
   }, {
