@@ -1,0 +1,26 @@
+{
+  "name": "DemoDemons (Staging): Stage Maker",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage",
+      "$ignoreUnknownInstances": true
+    },
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "$path": "src/StarterPlayer",
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      },
+      "StarterCharacterScripts": {
+        "$path": "src/StarterPlayer/StarterCharacterScripts",
+        "$className": "StarterCharacterScripts"
+      }
+    },
+    "StarterGui": {
+      "$path": "src/StarterGui"
+    }
+  }
+}

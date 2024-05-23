@@ -27,7 +27,7 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
     assert(stageBuild and stageBuild:IsA("Model"), "Couldn't find Stage the Workspace.");
 
     -- Package the stage.
-    ReplicatedStorage.Events.StageBuildDataSaveStarted:FireAllClients();
+    ReplicatedStorage.Events.StageBuildDataSaveStarted:FireAllClients(player);
     type Vector3Serialization = {X: number; Y: number; Z: number};
     type PackageInstance = {{
       type: string;
@@ -114,7 +114,7 @@ ReplicatedStorage.Functions.SaveStageBuildData.OnServerInvoke = function(player)
 
     -- 
     print("Successfully saved the stage's build data.");
-    ReplicatedStorage.Events.StageBuildDataSaveCompleted:FireAllClients();
+    ReplicatedStorage.Events.StageBuildDataSaveCompleted:FireAllClients(player);
     
   end);
   
