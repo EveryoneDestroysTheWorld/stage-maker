@@ -88,4 +88,3 @@ local function BuildingToolsContainer()
 end
 
 root:render(React.createElement(BuildingToolsContainer));
-

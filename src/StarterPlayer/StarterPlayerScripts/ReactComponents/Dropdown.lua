@@ -95,6 +95,7 @@ local function Dropdown(props: DropdownProps)
     VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar;
     BorderSizePixel = 0;
     ScrollingDirection = Enum.ScrollingDirection.Y;
+    CanvasSize = UDim2.new(0, 0, 1, -30);
     Visible = isDropdownOpen;
     Size = UDim2.new(1, 0, 1, -30);
   }, {UIListLayout, options});

@@ -6,7 +6,11 @@ local selectedPart: BasePart?;
 
 local buttonInfoPairs: {{string}} = {
   {"CreateButton", "PartCreator"}, 
-  {"ColorButton", "PartColorModifier"}
+  {"ColorButton", "PartColorModifier"},
+  {"MaterialButton", "PartMaterialModifier"},
+  {"OrientationButton", "PartOrientationModifier"},
+  {"AnchorButton", "PartAnchorModifier"},
+  {"CollisionButton", "PartCollisionModifier"}
 };
 
 local modificationTools = window.ModificationTools;

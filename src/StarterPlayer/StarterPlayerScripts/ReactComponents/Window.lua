@@ -33,10 +33,15 @@ local function Window(props: WindowProps)
     Padding = UDim.new(0, 5);
   });
     
-  local WindowContent = React.createElement("CanvasGroup", {
+  local WindowContent = React.createElement("ScrollingFrame", {
     Name = "Content",
     Size = UDim2.new(1, 0, 1, -30);
+    CanvasSize = UDim2.new(0, 0, 1, -30);
     BackgroundTransparency = 1;
+    AutomaticCanvasSize = Enum.AutomaticSize.Y;
+    VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar;
+    BorderSizePixel = 0;
+    ScrollingDirection = Enum.ScrollingDirection.Y;
   }, {UIListLayout2, UIPadding, props.children});
   
   local UICorner = React.createElement("UICorner", {
