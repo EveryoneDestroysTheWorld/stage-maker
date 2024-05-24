@@ -3,81 +3,65 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
-type PartCollisionModificationWindowProps = {handle: ScreenGui};
+type PartCollisionModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
 
 local function PartCollisionModificationWindow(props: PartCollisionModificationWindowProps)
 
-  local parts: {BasePart?}, setParts = React.useState({});
-
-  local canCollide, setCanCollide = React.useState(false);
-
+  local canCollide: boolean, setCanCollide = React.useState(false);
+  
   React.useEffect(function()
-
+    
     local events = {};
-    for i, part in ipairs(parts) do
+    local firstPart = props.parts[1];
+    if firstPart then
+        
+      table.insert(events, firstPart:GetPropertyChangedSignal("CanCollide"):Connect(function()
 
-      if i == 1 then
+        setCanCollide(firstPart.CanCollide);
 
-        table.insert(events, part:GetPropertyChangedSignal("CanCollide"):Connect(function()
+      end));
 
-          setCanCollide(part.Anchored);
-
-        end))
-
-      end
-
+      setCanCollide(firstPart.CanCollide);
+      
     end;
-
+    
     return function()
-
+      
       for _, event in ipairs(events) do
-
+        
         event:Disconnect();
-
+        
       end
-
+      
     end
-
-  end, {parts});
-
-  React.useEffect(function()
-
-    game:GetService("ReplicatedStorage").Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
-
-      setParts(selectedParts);
-      setCanCollide(if selectedParts[1] then selectedParts[1].CanCollide else false);
-
-    end)
-
-  end, {});
-
-
+    
+  end, {props.parts});
+  
   return React.createElement(Window, {
     name = "Collisions"; 
     size = UDim2.new(0, 250, 0, 135); 
-    onCloseButtonClick = function()
-
-      props.handle.Enabled = false;
-
-    end
+    onCloseButtonClick = props.onClose;
   }, {
     React.createElement(Checkbox, {
       text = "Enable collisions";
       isChecked = canCollide;
       onClick = function()
-
-        local possiblePart = parts[1];
+        
+        local possiblePart = props.parts[1];
         if possiblePart then
+          
+          -- Get the part names because we can't transfer instances with RemoteFunctions.
+          local partIds = {};
+          for _, part in ipairs(props.parts) do
 
-          local canCollide = not possiblePart.CanCollide;
-          for _, part in ipairs(parts) do
+            table.insert(partIds, part.Name);
 
-            part.CanCollide = canCollide;
+          end;
 
-          end
-
+          ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {CanCollide = not possiblePart.CanCollide});
+          
         end
-
+        
       end;
     });
   })
