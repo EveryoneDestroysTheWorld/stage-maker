@@ -4,13 +4,6 @@
 * Christian "Sudobeast" Toney - Programmer
 
 ### Third-party library developers
-#### F3XTeam/RBX-Building-Tools
-* GigsD4X
-* AnonymousPrayers
-* evaera
-* Usering
-* Validark
-
 #### google/material-design-icons
 * Google
 
@@ -29,6 +22,73 @@
 * Henry Allen
 * Oliver Trepanier
 * Hugh Collins
+
+#### rojo-rbx/rojo
+* LPGhatguy
+* boatbomber
+* kennethloeffler
+* Dekkonot
+* nezuo
+* Quenty
+* Boegie19
+* filiptibell
+* Barocena
+* Kampfkarren
+* Mixu78
+* wackbyte
+* JohnnyMorganz
+* u-train
+* MaximumADHD
+* imacodr
+* VernandoGames
+* sasial-dev
+* GlowingUmbreon
+* jeparlefrancais
+* ayuka
+* Rudy-Dev
+* blake-mealey
+* schmatz
+* WatermelonArray
+* 4xMSAA
+* tacheometry
+* fewkz
+* ok-nick
+* Reselim
+* Miizzuu
+* cliffchapmanrbx
+* chriscerie
+* Validark
+* Vorlias
+* ZoteTheMighty
+* evaera
+* DiegoAlpizar
+* EgoMoose
+* nukropina
+* Jaguar-515
+* cozywitchcraft
+* jackTabsCode
+* Corecii
+
+#### UpliftGames/wally
+* magnalite
+* LPGhatguy
+* RileyAbr
+* boatbomber
+* u-train
+* filiptibell
+* LastTalon
+* MobiusCraftFlip
+* ok-nick
+* cipharius
+* ChipioIndustries
+* Coyenn
+* brandon-kong
+* guidable0
+* RyanLua
+* chriscerie
+* ddavness
+* nezuo
+* sasial-dev
 
 ## Quick links
 * [Place page](https://www.roblox.com/games/17474086074/DemoDemons-Staging-Stage-Maker?AssetId=17474086074)
