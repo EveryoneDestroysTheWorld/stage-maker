@@ -1,80 +1,88 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
+local NumberInput = require(script.Parent.Parent.ReactComponents.NumberInput);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
-type PartAnchorModificationWindowProps = {handle: ScreenGui};
+type PartDurabilityModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
 
-local function PartAnchorModificationWindow(props: PartAnchorModificationWindowProps)
-  
-  local parts: {BasePart?}, setParts = React.useState({});
+local function PartDurabilityModificationWindow(props: PartDurabilityModificationWindowProps)
 
-  local isAnchored, setIsAnchored = React.useState(false);
-  
+  local baseDurability: number?, setBaseDurability = React.useState(nil);
   React.useEffect(function()
-    
-    local events = {};
-    for i, part in ipairs(parts) do
-      
-      if i == 1 then
-        
-        table.insert(events, part:GetPropertyChangedSignal("Anchored"):Connect(function()
 
-          setIsAnchored(part.Anchored);
+    local firstPart = props.parts[1];
+    if firstPart then
 
-        end))
-        
-      end
+      local event = firstPart:GetAttributeChangedSignal("BaseDurability"):Connect(function()
       
-    end;
-    
-    return function()
-      
-      for _, event in ipairs(events) do
-        
+        setBaseDurability(firstPart:GetAttribute("BaseDurability"));
+
+      end)
+      setBaseDurability(firstPart:GetAttribute("BaseDurability"));
+
+      return function()
+
         event:Disconnect();
-        
-      end
+
+      end;
+      
+    else
+      
+      setBaseDurability(nil);
+      return;
       
     end
     
-  end, {parts});
+  end, {props.parts});
   
-  React.useEffect(function()
-    
-    game:GetService("ReplicatedStorage").Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
-      
-      setParts(selectedParts);
-      if selectedParts[1] then
-
-        setIsAnchored(selectedParts[1].Anchored);
-        
-      else
-        
-        setIsAnchored(false)
-        
-      end
-      
-    end)
-    
-  end, {});
-  
-  
+  local isPartIndestructable = baseDurability == math.huge;
   return React.createElement(Window, {
-    name = "Anchor"; 
+    name = "Durability"; 
     size = UDim2.new(0, 250, 0, 135); 
-    onCloseButtonClick = function()
-
-      props.handle.Enabled = false;
-
-    end
+    onCloseButtonClick = props.onClose;
   }, {
+    React.createElement(NumberInput, {
+      label = "Base durability";
+      value = baseDurability;
+      onChange = function(newValue)
+        
+        local possiblePart = props.parts[1];
+        if possiblePart then
+          
+          -- Get the part names because we can't transfer instances with RemoteFunctions.
+          local partIds = {};
+          for _, part in ipairs(props.parts) do
+
+            table.insert(partIds, part.Name);
+
+          end;
+
+          ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {BaseDurability = baseDurability});
+          
+        end
+        
+      end;
+    });
     React.createElement(Checkbox, {
-      text = "Anchored";
-      isChecked = isAnchored;
+      text = "Indestructable";
+      isChecked = isPartIndestructable;
       onClick = function()
         
-        
+        local possiblePart = props.parts[1];
+        if possiblePart then
+          
+          -- Get the part names because we can't transfer instances with RemoteFunctions.
+          local partIds = {};
+          for _, part in ipairs(props.parts) do
+
+            table.insert(partIds, part.Name);
+
+          end;
+
+          ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {BaseDurability = if isPartIndestructable then 100 else math.huge});
+          
+        end
         
       end;
     });
@@ -82,4 +90,4 @@ local function PartAnchorModificationWindow(props: PartAnchorModificationWindowP
 
 end
 
-return PartAnchorModificationWindow;
+return PartDurabilityModificationWindow;

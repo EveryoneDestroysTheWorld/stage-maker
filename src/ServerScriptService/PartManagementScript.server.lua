@@ -11,6 +11,7 @@ ReplicatedStorage.Shared.Functions.CreatePart.OnServerInvoke = function(player: 
   part.Anchored = true;
   part.Shape = partProperties.Shape;
   part.CFrame = partProperties.CFrame;
+  part:SetAttribute("BaseDurability", math.huge);
   part.Parent = stage;
   
   return part.Name;
@@ -36,7 +37,15 @@ ReplicatedStorage.Shared.Functions.UpdateParts.OnServerInvoke = function(player:
     local part = stage:FindFirstChild(partId);
     for propertyName, propertyValue in pairs(newProperties) do
 
-      part[propertyName] = propertyValue;
+      if propertyName == "BaseDurability" then
+
+        part:SetAttribute("BaseDurability", propertyValue);
+
+      else 
+
+        part[propertyName] = propertyValue;
+
+      end;
 
     end;
 

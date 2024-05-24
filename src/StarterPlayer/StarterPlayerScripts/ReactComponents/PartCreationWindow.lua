@@ -1,3 +1,4 @@
+--!strict
 -- PartCreationWindow.lua
 -- Written by Christian "Sudobeast" Toney
 -- This script helps the player visualize a part before they place it.
