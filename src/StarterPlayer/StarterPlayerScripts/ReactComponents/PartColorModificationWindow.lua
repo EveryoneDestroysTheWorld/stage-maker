@@ -8,42 +8,59 @@ type PartColorModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
 
 local function PartColorModificationWindow(props: PartColorModificationWindowProps)
 
-  local currentColor3, setCurrentColor3 = React.useState(nil);
-  local colors, setColors = React.useState({});
+  local currentColor3: Color3?, setCurrentColor3 = React.useState(nil);
+  local colors: {Color3}, setColors = React.useState({});
 
   React.useEffect(function()
 
+    local events = {};
     local firstPart = props.parts[1];
-    if currentColor3 then
+    if firstPart then
+        
+      table.insert(events, firstPart:GetPropertyChangedSignal("Color"):Connect(function()
 
-      for _, part in ipairs(props.parts) do
+        setCurrentColor3(firstPart.Color);
 
-        part.Color = currentColor3;
-  
-      end
-
-    elseif firstPart then
+      end));
 
       setCurrentColor3(firstPart.Color);
-
+      
     end;
+    
+    return function()
+      
+      for _, event in ipairs(events) do
+        
+        event:Disconnect();
+        
+      end
+      
+    end
+    
+  end, {props.parts});
 
-  end, {currentColor3});
+  local function updateColor(newColor3: Color3): ()
+
+    local partIds = {};
+    for _, part in ipairs(props.parts) do
+
+      table.insert(partIds, part.Name);
+
+    end
+    ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {Color = newColor3});
+
+  end;
 
   local HexColorInputWithProps = React.createElement(HexColorInput, {
     color3 = currentColor3;
-    onChange = function(newColor3)
-
-      setCurrentColor3(newColor3);
-
-    end;
+    onChange = function(newColor: Color3) updateColor(newColor) end;
   });
 
   local ColorPaletteWithProps = React.createElement(ColorPalette, {
     currentColor = currentColor3; 
     colors = colors;
     onChange = function(newColors) setColors(newColors) end;
-    onSelect = function(selectedColor) setCurrentColor3(selectedColor) end;
+    onSelect = function(selectedColor: Color3) updateColor(selectedColor) end;
   });
 
   return React.createElement(Window, {

@@ -71,7 +71,7 @@ local function BuildingToolsContainer()
           onClick = function() setSelectedWindow(React.createElement(PartMaterialModificationWindow, globalProps)); end;
         }, {
           name = "AnchorButton";
-          iconImage = "rbxassetid://17551033481";
+          iconImage = "rbxassetid://17550968289";
           onClick = function() setSelectedWindow(React.createElement(PartAnchorModificationWindow, globalProps)); end;
         }, {
           name = "CollisionButton";
@@ -83,7 +83,7 @@ local function BuildingToolsContainer()
           onClick = function() setSelectedWindow(React.createElement(PartSurfaceModificationWindow, globalProps)); end;
         }, {
           name = "DurabilityButton";
-          iconImage = "rbxassetid://17550968289";
+          iconImage = "rbxassetid://17551033481";
           onClick = function() setSelectedWindow(React.createElement(PartDurabilityModificationWindow, globalProps)); end;
         }
       }
