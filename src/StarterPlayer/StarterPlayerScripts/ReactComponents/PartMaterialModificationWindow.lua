@@ -5,7 +5,7 @@ local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 local NumberInput = require(script.Parent.Parent.ReactComponents.NumberInput);
 
-type PartMaterialModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
+type PartMaterialModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 
 local function PartMaterialModificationWindow(props: PartMaterialModificationWindowProps)
   
@@ -18,12 +18,7 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       text = material.Name;
       onClick = function()
         
-        setSelectedOptionIndex(index);
-        for _, part in ipairs(props.parts) do
-          
-          part.Material = material;
-          
-        end
+        props.updateParts({Material = material});
         
       end;
     });
@@ -38,10 +33,24 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
     local firstPart = props.parts[1];
     if firstPart then
 
-      setSelectedOptionIndex(table.find(Enum.Material:GetEnumItems(), firstPart.Material));
-      setIsShadowEnabled(firstPart.CastShadow);
-      setReflectance(firstPart.Reflectance);
-      setTransparency(firstPart.Transparency);
+      local function updateVariables()
+
+        setSelectedOptionIndex(table.find(Enum.Material:GetEnumItems(), firstPart.Material));
+        setIsShadowEnabled(firstPart.CastShadow);
+        setReflectance(firstPart.Reflectance);
+        setTransparency(firstPart.Transparency);
+
+      end;
+
+      local event = firstPart:GetPropertyChangedSignal("Material"):Connect(updateVariables);
+      updateVariables();
+
+      return function()
+
+        event:Disconnect();
+
+      end;
+      
       
     else
       
@@ -51,6 +60,8 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       setTransparency();
       
     end
+
+    return;
     
   end, {props.parts});
   
@@ -63,42 +74,19 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
     React.createElement(Checkbox, {
       text = "Cast shadow";
       isChecked = isShadowEnabled;
-      onClick = function()
-        
-        local firstPart = props.parts[1];
-        if firstPart then
-          
-          local castShadow = not firstPart.CastShadow;
-          for _, part in ipairs(props.parts) do
-            
-            part.CastShadow = castShadow;
-            
-          end
-          setIsShadowEnabled(castShadow);
-          
-        end
-        
+      onClick = function(newValue)
+
+        props.updateParts({CastShadow = not isShadowEnabled});
+
       end;
     });
     React.createElement(NumberInput, {
       label = "Transparency";
       value = transparency;
       onChange = function(newValue)
-        
-        local firstPart = props.parts[1];
-        if firstPart then
-          
-          newValue = if newValue > 0.8 then 0.8 else newValue;
-          
-          for _, part in ipairs(props.parts) do
 
-            part.Transparency = newValue;
+        props.updateParts({Transparency = if newValue > 0.8 then 0.8 else newValue});
 
-          end
-          setTransparency(firstPart.Transparency);
-          
-        end
-        
       end;
     });
     React.createElement(NumberInput, {
@@ -106,17 +94,7 @@ local function PartMaterialModificationWindow(props: PartMaterialModificationWin
       reflectance = reflectance;
       onChange = function(newValue)
 
-        local firstPart = props.parts[1];
-        if firstPart then
-
-          for _, part in ipairs(props.parts) do
-
-            part.Reflectance = newValue;
-
-          end
-          setReflectance(firstPart.Reflectance);
-
-        end
+        props.updateParts({Reflectance = newValue});
 
       end;
     });

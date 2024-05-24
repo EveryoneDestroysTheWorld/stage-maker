@@ -3,7 +3,7 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
-type PartAnchorModificationWindowProps = {onClose: () -> (); parts: {BasePart?};};
+type PartAnchorModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 
 local function PartAnchorModificationWindow(props: PartAnchorModificationWindowProps)
 
@@ -47,20 +47,7 @@ local function PartAnchorModificationWindow(props: PartAnchorModificationWindowP
       isChecked = isAnchored;
       onClick = function()
         
-        local possiblePart = props.parts[1];
-        if possiblePart then
-          
-          -- Get the part names because we can't transfer instances with RemoteFunctions.
-          local partIds = {};
-          for _, part in ipairs(props.parts) do
-
-            table.insert(partIds, part.Name);
-
-          end;
-
-          ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {Anchored = not possiblePart.Anchored});
-          
-        end
+        props.updateParts({Anchored = not isAnchored});
         
       end;
     });

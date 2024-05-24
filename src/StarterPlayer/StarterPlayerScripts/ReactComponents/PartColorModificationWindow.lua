@@ -4,7 +4,7 @@ local Window = require(script.Parent.Parent.ReactComponents.Window);
 local HexColorInput = require(script.Parent.Parent.ReactComponents.HexColorInput);
 local ColorPalette = require(script.Parent.Parent.ReactComponents.ColorPalette);
 
-type PartColorModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
+type PartColorModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 
 local function PartColorModificationWindow(props: PartColorModificationWindowProps)
 
@@ -39,28 +39,16 @@ local function PartColorModificationWindow(props: PartColorModificationWindowPro
     
   end, {props.parts});
 
-  local function updateColor(newColor3: Color3): ()
-
-    local partIds = {};
-    for _, part in ipairs(props.parts) do
-
-      table.insert(partIds, part.Name);
-
-    end
-    ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {Color = newColor3});
-
-  end;
-
   local HexColorInputWithProps = React.createElement(HexColorInput, {
     color3 = currentColor3;
-    onChange = function(newColor: Color3) updateColor(newColor) end;
+    onChange = function(newColor: Color3) props.updateParts({Color = newColor}) end;
   });
 
   local ColorPaletteWithProps = React.createElement(ColorPalette, {
     currentColor = currentColor3; 
     colors = colors;
     onChange = function(newColors) setColors(newColors) end;
-    onSelect = function(selectedColor: Color3) updateColor(selectedColor) end;
+    onSelect = function(selectedColor: Color3) props.updateParts({Color = selectedColor}) end;
   });
 
   return React.createElement(Window, {

@@ -4,7 +4,7 @@ local Window = require(script.Parent.Parent.ReactComponents.Window);
 local NumberInput = require(script.Parent.Parent.ReactComponents.NumberInput);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
-type PartDurabilityModificationWindowProps = {onClose: () -> (); parts: {BasePart?}};
+type PartDurabilityModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 
 local function PartDurabilityModificationWindow(props: PartDurabilityModificationWindowProps)
 
@@ -69,20 +69,7 @@ local function PartDurabilityModificationWindow(props: PartDurabilityModificatio
       isChecked = isPartIndestructable;
       onClick = function()
         
-        local possiblePart = props.parts[1];
-        if possiblePart then
-          
-          -- Get the part names because we can't transfer instances with RemoteFunctions.
-          local partIds = {};
-          for _, part in ipairs(props.parts) do
-
-            table.insert(partIds, part.Name);
-
-          end;
-
-          ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {BaseDurability = if isPartIndestructable then 100 else math.huge});
-          
-        end
+        props.updateParts({BaseDurability = if isPartIndestructable then 100 else math.huge});
         
       end;
     });

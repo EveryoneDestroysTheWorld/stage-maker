@@ -3,18 +3,16 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Parent.ReactComponents.Window);
 local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
 
-type PartAnchorModificationWindowProps = {handle: ScreenGui};
+type PartSurfaceModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 
-local function PartAnchorModificationWindow(props: PartAnchorModificationWindowProps)
-  
-  local parts: {BasePart?}, setParts = React.useState({});
+local function PartSurfaceModificationWindow(props: PartSurfaceModificationWindowProps)
 
   local isAnchored, setIsAnchored = React.useState(false);
   
   React.useEffect(function()
     
     local events = {};
-    for i, part in ipairs(parts) do
+    for i, part in ipairs(props.parts) do
       
       if i == 1 then
         
@@ -38,47 +36,23 @@ local function PartAnchorModificationWindow(props: PartAnchorModificationWindowP
       
     end
     
-  end, {parts});
-  
-  React.useEffect(function()
-    
-    game:GetService("ReplicatedStorage").Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
-      
-      setParts(selectedParts);
-      if selectedParts[1] then
-
-        setIsAnchored(selectedParts[1].Anchored);
-        
-      else
-        
-        setIsAnchored(false)
-        
-      end
-      
-    end)
-    
-  end, {});
-  
+  end, {props.parts});
   
   return React.createElement(Window, {
-    name = "Anchor"; 
+    name = "Surfaces"; 
     size = UDim2.new(0, 250, 0, 135); 
-    onCloseButtonClick = function()
-
-      props.handle.Enabled = false;
-
-    end
+    onCloseButtonClick = props.onClose;
   }, {
     React.createElement(Checkbox, {
       text = "Anchored";
       isChecked = isAnchored;
       onClick = function()
         
-        local possiblePart = parts[1];
+        local possiblePart = props.parts[1];
         if possiblePart then
           
           local isAnchored = not possiblePart.Anchored;
-          for _, part in ipairs(parts) do
+          for _, part in ipairs(props.parts) do
             
             part.Anchored = isAnchored;
             
@@ -92,4 +66,4 @@ local function PartAnchorModificationWindow(props: PartAnchorModificationWindowP
 
 end
 
-return PartAnchorModificationWindow;
+return PartSurfaceModificationWindow;

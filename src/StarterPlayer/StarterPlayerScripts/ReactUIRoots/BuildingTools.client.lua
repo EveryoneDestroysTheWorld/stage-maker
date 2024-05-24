@@ -33,9 +33,24 @@ local function BuildingToolsContainer()
     end)
     
   end, {});
-  
+
   local selectedWindow, setSelectedWindow = React.useState(React.createElement(React.Fragment));
-  local globalProps = {parts = selectedParts; onClose = function() setSelectedWindow(React.Fragment) end};
+  local globalProps = {
+    parts = selectedParts; 
+    onClose = function() setSelectedWindow(React.Fragment) end;
+    updateParts = function(newProperties) 
+    
+      local partIds = {};
+      for _, part in ipairs(selectedParts) do
+    
+        table.insert(partIds, part.Name);
+    
+      end;
+
+      ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, newProperties);
+
+    end;
+  };
   
   local sections = {
     {
