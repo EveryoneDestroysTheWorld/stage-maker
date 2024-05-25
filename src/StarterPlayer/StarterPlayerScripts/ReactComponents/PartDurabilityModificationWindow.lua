@@ -50,15 +50,7 @@ local function PartDurabilityModificationWindow(props: PartDurabilityModificatio
         local possiblePart = props.parts[1];
         if possiblePart then
           
-          -- Get the part names because we can't transfer instances with RemoteFunctions.
-          local partIds = {};
-          for _, part in ipairs(props.parts) do
-
-            table.insert(partIds, part.Name);
-
-          end;
-
-          ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, {BaseDurability = baseDurability});
+          props.updateParts({BaseDurability = baseDurability});
           
         end
         
