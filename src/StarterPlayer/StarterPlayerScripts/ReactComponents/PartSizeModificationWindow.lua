@@ -3,9 +3,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Window);
 
-type PartPositionModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ();};
+type PartSizeModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ();};
 
-local function PartPositionModificationWindow(props: PartPositionModificationWindowProps)
+local function PartSizeModificationWindow(props: PartSizeModificationWindowProps)
   
   local textBoxes = {};
   local positionX: number?, setPositionX = React.useState(nil);
@@ -164,4 +164,4 @@ local function PartPositionModificationWindow(props: PartPositionModificationWin
 
 end
 
-return PartPositionModificationWindow;
+return PartSizeModificationWindow;
