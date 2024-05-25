@@ -27,31 +27,24 @@ export type BuildingToolsWindowProps = {onClose: () -> ()};
 local function BuildingToolsContainer()
 
   local selectedParts, setSelectedParts = React.useState({});
+  local highlights, setHighlights = React.useState({});
   React.useEffect(function()
-    
-    local highlightFolder = Instance.new("Folder");
-    highlightFolder.Name = "Highlights";
-    highlightFolder.Parent = handle;
 
-    local highlights = {};
     ReplicatedStorage.Shared.Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
 
-      for _, highlight in ipairs(highlights) do
-
-        highlight:Destroy();
-
-      end;
-
-      setSelectedParts(selectedParts);
+      local highlights = {};
       for _, part in ipairs(selectedParts) do
 
-        local highlight = Instance.new("Highlight");
-        highlight.FillTransparency = 1;
-        highlight.Adornee = part;
-        highlight.Parent = highlightFolder;
-        table.insert(highlights, highlight);
+        table.insert(highlights, React.createElement("Highlight", {
+          Name = part.Name;
+          FillTransparency = 1; 
+          Adornee = part;
+        }));
 
       end
+
+      setHighlights(highlights);
+      setSelectedParts(selectedParts);
 
     end)
     
@@ -129,17 +122,13 @@ local function BuildingToolsContainer()
   };
 
   -- Set up the select tool.
+  local target: BasePart?, setTarget = React.useState(nil);
   React.useEffect(function()
-  
-    local selectionBox = Instance.new("Highlight");
-    selectionBox.FillTransparency = 1;
-    selectionBox.OutlineTransparency = 0.6;
-    selectionBox.Parent = handle;
 
     game:GetService("RunService").Heartbeat:Connect(function()
     
       local target = player:GetMouse().Target;
-      selectionBox.Adornee = if target and target.Parent == workspace.Stage then target else nil;
+      setTarget(if target and target.Parent == workspace.Stage then target else nil);
 
     end);
 
@@ -191,6 +180,16 @@ local function BuildingToolsContainer()
   return React.createElement(React.StrictMode, {}, {
     React.createElement(BuildingToolsSelector, {sections = sections});
     selectedWindow;
+    React.createElement("Folder", {
+      Name = "Selections";
+    }, {
+      highlights, 
+      React.createElement("Highlight", {
+        Name = "Highlight";
+        Adornee = target;
+        FillTransparency = 1;
+        OutlineTransparency = 0.6;
+      });});
   });
   
 end
