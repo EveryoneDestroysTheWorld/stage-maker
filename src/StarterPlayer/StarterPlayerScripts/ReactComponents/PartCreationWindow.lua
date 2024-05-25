@@ -105,11 +105,7 @@ local function PartCreationWindow(props: PartCreationWindowProps)
   return React.createElement(Window, {
     name = "Create part"; 
     size = UDim2.new(0, 250, 0, 165); 
-    onCloseButtonClick = function()
-
-      props.onClose();
-
-    end
+    onCloseButtonClick = props.onClose;
   }, {
     React.createElement(Dropdown, {selectedIndex = selectedOptionIndex; options = dropdownOptions}) 
   });

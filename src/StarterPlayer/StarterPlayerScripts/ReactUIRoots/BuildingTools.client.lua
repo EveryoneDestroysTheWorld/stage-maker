@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
+local UserInputService = game:GetService("UserInputService");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local PartMaterialModificationWindow = require(script.Parent.Parent.ReactComponents.PartMaterialModificationWindow);
@@ -11,10 +12,12 @@ local PartDurabilityModificationWindow = require(script.Parent.Parent.ReactCompo
 local PartSurfaceModificationWindow = require(script.Parent.Parent.ReactComponents.PartSurfaceModificationWindow);
 local BuildingToolsSelector = require(script.Parent.Parent.ReactComponents.BuildingToolsSelector);
 
+local player = game:GetService("Players").LocalPlayer;
+
 local handle = Instance.new("ScreenGui");
 handle.Name = "BuildingTools";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-handle.Parent = game.Players.LocalPlayer.PlayerGui;
+handle.Parent = player.PlayerGui;
 handle.Enabled = true;
 
 local root = ReactRoblox.createRoot(handle);
@@ -26,9 +29,29 @@ local function BuildingToolsContainer()
   local selectedParts, setSelectedParts = React.useState({});
   React.useEffect(function()
     
+    local highlightFolder = Instance.new("Folder");
+    highlightFolder.Name = "Highlights";
+    highlightFolder.Parent = handle;
+
+    local highlights = {};
     ReplicatedStorage.Shared.Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
 
+      for _, highlight in ipairs(highlights) do
+
+        highlight:Destroy();
+
+      end;
+
       setSelectedParts(selectedParts);
+      for _, part in ipairs(selectedParts) do
+
+        local highlight = Instance.new("Highlight");
+        highlight.FillTransparency = 1;
+        highlight.Adornee = part;
+        highlight.Parent = highlightFolder;
+        table.insert(highlights, highlight);
+
+      end
 
     end)
     
@@ -37,7 +60,7 @@ local function BuildingToolsContainer()
   local selectedWindow, setSelectedWindow = React.useState(React.createElement(React.Fragment));
   local globalProps = {
     parts = selectedParts; 
-    onClose = function() setSelectedWindow(React.Fragment) end;
+    onClose = function() setSelectedWindow(React.createElement(React.Fragment)) end;
     updateParts = function(newProperties) 
     
       local partIds = {};
@@ -104,6 +127,66 @@ local function BuildingToolsContainer()
       }
     }
   };
+
+  -- Set up the select tool.
+  React.useEffect(function()
+  
+    local selectionBox = Instance.new("Highlight");
+    selectionBox.FillTransparency = 1;
+    selectionBox.OutlineTransparency = 0.6;
+    selectionBox.Parent = handle;
+
+    game:GetService("RunService").Heartbeat:Connect(function()
+    
+      local target = player:GetMouse().Target;
+      selectionBox.Adornee = if target and target.Parent == workspace.Stage then target else nil;
+
+    end);
+
+  end, {});
+
+  React.useEffect(function()
+  
+    local mouse = player:GetMouse();
+    local mouseButtonDownEvent = mouse.Button1Down:Connect(function()
+    
+      local target = mouse.Target;
+      if target and target.Parent == workspace.Stage then
+
+        local newSelectedParts = {mouse.Target};
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+
+          newSelectedParts = selectedParts;
+          local index = table.find(newSelectedParts, target);
+          if index then
+
+            table.remove(newSelectedParts, index);
+
+          else
+
+            table.insert(newSelectedParts, target);
+
+          end;
+
+        end;
+        
+        ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire(newSelectedParts);
+
+      else
+
+        ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire({});
+
+      end;
+
+    end);
+
+    return function()
+
+      mouseButtonDownEvent:Disconnect();
+
+    end;
+
+  end, {selectedParts});
   
   return React.createElement(React.StrictMode, {}, {
     React.createElement(BuildingToolsSelector, {sections = sections});
