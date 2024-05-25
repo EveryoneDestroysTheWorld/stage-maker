@@ -12,6 +12,7 @@ local PartAnchorModificationWindow = require(ReactComponents.PartAnchorModificat
 local PartCollisionModificationWindow = require(ReactComponents.PartCollisionModificationWindow);
 local PartDurabilityModificationWindow = require(ReactComponents.PartDurabilityModificationWindow);
 local PartSurfaceModificationWindow = require(ReactComponents.PartSurfaceModificationWindow);
+local PartSizeModificationWindow = require(ReactComponents.PartSizeModificationWindow);
 local BuildingToolsSelector = require(ReactComponents.BuildingToolsSelector);
 
 local player = game:GetService("Players").LocalPlayer;
@@ -89,7 +90,7 @@ local function BuildingToolsContainer()
         }, {
           name = "ResizeButton";
           iconImage = "rbxassetid://17547037235";
-          onClick = function() setSelectedWindow(React.createElement(PartOrientationModificationWindow, globalProps)); end;
+          onClick = function() setSelectedWindow(React.createElement(PartSizeModificationWindow, globalProps)); end;
         }, {
           name = "OrientationButton";
           iconImage = "rbxassetid://17547019914";

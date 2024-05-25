@@ -116,7 +116,7 @@ local function PartPositionModificationWindow(props: PartPositionModificationWin
     end;
     for _, part in ipairs(props.parts) do
 
-      table.insert(events, part:GetPropertyChangedSignal("Orientation"):Connect(function()
+      table.insert(events, part:GetPropertyChangedSignal("Position"):Connect(function()
       
         updatePosition();
 

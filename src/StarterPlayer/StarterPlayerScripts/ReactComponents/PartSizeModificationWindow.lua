@@ -8,15 +8,15 @@ type PartSizeModificationWindowProps = {onClose: () -> (); parts: {BasePart}; up
 local function PartSizeModificationWindow(props: PartSizeModificationWindowProps)
   
   local textBoxes = {};
-  local positionX: number?, setPositionX = React.useState(nil);
-  local positionY: number?, setPositionY = React.useState(nil);
-  local positionZ: number?, setPositionZ = React.useState(nil);
+  local sizeX: number?, setSizeX = React.useState(nil);
+  local sizeY: number?, setSizeY = React.useState(nil);
+  local sizeZ: number?, setSizeZ = React.useState(nil);
   for i = 1, 3 do
 
-    local position = ({positionX, positionY, positionZ})[i];
+    local position = ({sizeX, sizeY, sizeZ})[i];
     table.insert(textBoxes, React.createElement("TextBox", {
       LayoutOrder = i;
-      Name = ({"PositionX", "PositionY", "PositionZ"})[i];
+      Name = ({"SizeX", "SizeY", "SizeZ"})[i];
       BackgroundColor3 = Color3.new(1, 1, 1);
       BackgroundTransparency = 0.8;
       BorderSizePixel = 0;
@@ -32,11 +32,11 @@ local function PartSizeModificationWindow(props: PartSizeModificationWindowProps
 
           for _, part in ipairs(props.parts) do
             
-            local positionX = if i == 1 then requestedValue else part.Position.X;
-            local positionY = if i == 2 then requestedValue else part.Position.Y;
-            local positionZ = if i == 3 then requestedValue else part.Position.Z;
+            local sizeX = if i == 1 then requestedValue else part.Size.X;
+            local sizeY = if i == 2 then requestedValue else part.Size.Y;
+            local sizeZ = if i == 3 then requestedValue else part.Size.Z;
             
-            ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer({part.Name}, {Position = Vector3.new(positionX, positionY, positionZ)});
+            ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer({part.Name}, {Size = Vector3.new(sizeX, sizeY, sizeZ)});
 
           end
 
@@ -52,24 +52,22 @@ local function PartSizeModificationWindow(props: PartSizeModificationWindowProps
   React.useEffect(function()
 
     local lastPart = props.parts[#props.parts];
+    local originalSize = Vector3.new();
     local originalCFrame = CFrame.identity;
     local handles = React.createElement("Handles", {
       Adornee = lastPart;
       Name = "Handles";
+      Style = Enum.HandlesStyle.Resize;
       [React.Event.MouseDrag] = function(self, face, distance)
-
-        local axis = {
-          [Enum.NormalId.Right] = lastPart.CFrame.RightVector,
-          [Enum.NormalId.Left] = -lastPart.CFrame.RightVector,
-          [Enum.NormalId.Top] = lastPart.CFrame.UpVector, 
-          [Enum.NormalId.Bottom] = -lastPart.CFrame.UpVector,
-          [Enum.NormalId.Front] = lastPart.CFrame.LookVector,
-          [Enum.NormalId.Back] = -lastPart.CFrame.LookVector,
-        };
 
         if lastPart then
           
-          props.updateParts({CFrame = originalCFrame + axis[face] * distance});
+          local direction = Vector3.fromNormalId(face);
+          local size = Vector3.new(math.abs(direction.X), math.abs(direction.Y), math.abs(direction.Z))
+          props.updateParts({
+            Size = originalSize + size * distance;
+            CFrame = originalCFrame * CFrame.new(direction / 2 * distance);
+          });
 
         end
 
@@ -78,6 +76,7 @@ local function PartSizeModificationWindow(props: PartSizeModificationWindowProps
 
         if lastPart then
           
+          originalSize = lastPart.Size;
           originalCFrame = lastPart.CFrame;
           
         end
@@ -86,43 +85,43 @@ local function PartSizeModificationWindow(props: PartSizeModificationWindowProps
     })
 
     local events = {};
-    local function updatePosition()
+    local function updateSize()
 
-      local positionX: number?;
-      local positionY: number?;
-      local positionZ: number?;
+      local sizeX: number?;
+      local sizeY: number?;
+      local sizeZ: number?;
 
       local firstPart = props.parts[1];
       if firstPart then
 
-        positionX = firstPart.Position.X;
-        positionY = firstPart.Position.Y;
-        positionZ = firstPart.Position.Z;
+        sizeX = firstPart.Size.X;
+        sizeY = firstPart.Size.Y;
+        sizeZ = firstPart.Size.Z;
 
         for _, part in ipairs(props.parts) do
 
-          positionX = if part.Position.X ~= positionX then nil else positionX;
-          positionY = if part.Position.Y ~= positionY then nil else positionY;
-          positionZ = if part.Position.Z ~= positionZ then nil else positionZ;
+          sizeX = if part.Size.X ~= sizeX then nil else sizeX;
+          sizeX = if part.Size.Y ~= sizeY then nil else sizeY;
+          sizeX = if part.Size.Z ~= sizeZ then nil else sizeZ;
 
         end;
 
       end;
 
-      setPositionX(positionX :: any);
-      setPositionY(positionY :: any);
-      setPositionZ(positionZ :: any);
+      setSizeX(sizeX :: any);
+      setSizeY(sizeY :: any);
+      setSizeZ(sizeZ :: any);
 
     end;
     for _, part in ipairs(props.parts) do
 
-      table.insert(events, part:GetPropertyChangedSignal("Orientation"):Connect(function()
+      table.insert(events, part:GetPropertyChangedSignal("Size"):Connect(function()
       
-        updatePosition();
+        updateSize();
 
       end));
 
-      updatePosition();
+      updateSize();
 
     end;
 
@@ -141,7 +140,7 @@ local function PartSizeModificationWindow(props: PartSizeModificationWindowProps
   end, {props.parts});
   
   return React.createElement(Window, {
-    name = "Position"; 
+    name = "Size"; 
     size = UDim2.new(0, 250, 0, 135); 
     onCloseButtonClick = props.onClose;
   }, {
