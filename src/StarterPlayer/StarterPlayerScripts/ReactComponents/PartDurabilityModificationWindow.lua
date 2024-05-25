@@ -1,8 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
-local Window = require(script.Parent.Parent.ReactComponents.Window);
-local NumberInput = require(script.Parent.Parent.ReactComponents.NumberInput);
-local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
+local Window = require(script.Parent.Window);
+local NumberInput = require(script.Parent.NumberInput);
+local Checkbox = require(script.Parent.Checkbox);
 
 type PartDurabilityModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 

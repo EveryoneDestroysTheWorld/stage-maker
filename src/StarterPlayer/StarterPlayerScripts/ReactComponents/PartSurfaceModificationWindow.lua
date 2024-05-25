@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
-local Window = require(script.Parent.Parent.ReactComponents.Window);
-local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
+local Window = require(script.Parent.Window);
+local Dropdown = require(script.Parent.Dropdown);
 
 type PartSurfaceModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 

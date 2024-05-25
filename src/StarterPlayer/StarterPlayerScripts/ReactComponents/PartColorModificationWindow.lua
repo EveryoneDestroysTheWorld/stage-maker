@@ -1,8 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
-local Window = require(script.Parent.Parent.ReactComponents.Window);
-local HexColorInput = require(script.Parent.Parent.ReactComponents.HexColorInput);
-local ColorPalette = require(script.Parent.Parent.ReactComponents.ColorPalette);
+local Window = require(script.Parent.Window);
+local HexColorInput = require(script.Parent.HexColorInput);
+local ColorPalette = require(script.Parent.ColorPalette);
 
 type PartColorModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 

@@ -8,15 +8,15 @@ type PartOrientationModificationWindowProps = {onClose: () -> (); parts: {BasePa
 local function PartOrientationModificationWindow(props: PartOrientationModificationWindowProps)
   
   local textBoxes = {};
-  local orientationX: number?, setOrientationX = React.useState(nil);
-  local orientationY: number?, setOrientationY = React.useState(nil);
-  local orientationZ: number?, setOrientationZ = React.useState(nil);
+  local positionX: number?, setPositionX = React.useState(nil);
+  local positionY: number?, setPositionY = React.useState(nil);
+  local positionZ: number?, setPositionZ = React.useState(nil);
   for i = 1, 3 do
 
-    local orientation = ({orientationX, orientationY, orientationZ})[i];
+    local position = ({positionX, positionY, positionZ})[i];
     table.insert(textBoxes, React.createElement("TextBox", {
       LayoutOrder = i;
-      Name = ({"OrientationX", "OrientationY", "OrientationZ"})[i];
+      Name = ({"PositionX", "PositionY", "PositionZ"})[i];
       BackgroundColor3 = Color3.new(1, 1, 1);
       BackgroundTransparency = 0.8;
       BorderSizePixel = 0;
@@ -24,7 +24,7 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
       TextColor3 = Color3.new(1, 1, 1);
       FontFace = Font.fromId(11702779517);
       TextSize = 14;
-      Text = if orientation then string.format("%.2f", orientation) else "";
+      Text = if position then string.format("%.2f", position) else "";
       [React.Event.FocusLost] = function(self)
 
         local requestedValue = tonumber(self.Text);
@@ -32,11 +32,11 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
 
           for _, part in ipairs(props.parts) do
             
-            local orientationX = if i == 1 then requestedValue else part.Orientation.X;
-            local orientationY = if i == 2 then requestedValue else part.Orientation.Y;
-            local orientationZ = if i == 3 then requestedValue else part.Orientation.Z;
+            local positionX = if i == 1 then requestedValue else part.Position.X;
+            local positionY = if i == 2 then requestedValue else part.Position.Y;
+            local positionZ = if i == 3 then requestedValue else part.Position.Z;
             
-            ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer({part.Name}, {Orientation = Vector3.new(orientationX, orientationY, orientationZ)});
+            ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer({part.Name}, {Position = Vector3.new(positionX, positionY, positionZ)});
 
           end
 
@@ -47,15 +47,15 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
     
   end;
   
-  local arcHandles: ArcHandles?, setArcHandles = React.useState(React.createElement(React.Fragment));
+  local handles: Handles?, setHandles = React.useState(React.createElement(React.Fragment));
   
   React.useEffect(function()
 
     local lastPart = props.parts[#props.parts];
     local originalCFrame = CFrame.identity;
-    local arcHandles = React.createElement("ArcHandles", {
+    local handles = React.createElement("Handles", {
       Adornee = lastPart;
-      Name = "ArcHandles";
+      Name = "Handles";
       [React.Event.MouseDrag] = function(self, axis, relativeAngle)
 
         local part = props.parts[1];
@@ -77,48 +77,49 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
 
       end;
     })
-    setArcHandles(arcHandles);
 
     local events = {};
-    local function updateOrientation()
+    local function updatePosition()
 
-      local orientationX: number?;
-      local orientationY: number?;
-      local orientationZ: number?;
+      local positionX: number?;
+      local positionY: number?;
+      local positionZ: number?;
 
       local firstPart = props.parts[1];
       if firstPart then
 
-        orientationX = firstPart.Orientation.X;
-        orientationY = firstPart.Orientation.Y;
-        orientationZ = firstPart.Orientation.Z;
+        positionX = firstPart.Position.X;
+        positionY = firstPart.Position.Y;
+        positionZ = firstPart.Position.Z;
 
         for _, part in ipairs(props.parts) do
 
-          orientationX = if part.Orientation.X ~= orientationX then nil else orientationX;
-          orientationY = if part.Orientation.Y ~= orientationY then nil else orientationY;
-          orientationZ = if part.Orientation.Z ~= orientationZ then nil else orientationZ;
+          positionX = if part.Position.X ~= positionX then nil else positionX;
+          positionY = if part.Position.Y ~= positionY then nil else positionY;
+          positionZ = if part.Position.Z ~= positionZ then nil else positionZ;
 
         end;
 
       end;
 
-      setOrientationX(orientationX :: any);
-      setOrientationY(orientationY :: any);
-      setOrientationZ(orientationZ :: any);
+      setPositionX(positionX :: any);
+      setPositionY(positionY :: any);
+      setPositionZ(positionZ :: any);
 
     end;
     for _, part in ipairs(props.parts) do
 
       table.insert(events, part:GetPropertyChangedSignal("Orientation"):Connect(function()
       
-        updateOrientation();
+        updatePosition();
 
       end));
 
-      updateOrientation();
+      updatePosition();
 
     end;
+
+    setHandles(handles);
 
     return function()
 
@@ -133,7 +134,7 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
   end, {props.parts});
   
   return React.createElement(Window, {
-    name = "Orientation"; 
+    name = "Position"; 
     size = UDim2.new(0, 250, 0, 135); 
     onCloseButtonClick = props.onClose;
   }, {
@@ -151,7 +152,7 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
       React.createElement("UICorner", {CornerRadius = UDim.new(0, 8)}, {});
       textBoxes,
     }),
-    arcHandles
+    handles
   });
 
 end

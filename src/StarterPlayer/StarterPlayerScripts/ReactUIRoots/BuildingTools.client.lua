@@ -2,15 +2,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local UserInputService = game:GetService("UserInputService");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
-local PartMaterialModificationWindow = require(script.Parent.Parent.ReactComponents.PartMaterialModificationWindow);
-local PartOrientationModificationWindow = require(script.Parent.Parent.ReactComponents.PartOrientationModificationWindow);
-local PartCreationWindow = require(script.Parent.Parent.ReactComponents.PartCreationWindow);
-local PartColorModificationWindow = require(script.Parent.Parent.ReactComponents.PartColorModificationWindow);
-local PartAnchorModificationWindow = require(script.Parent.Parent.ReactComponents.PartAnchorModificationWindow);
-local PartCollisionModificationWindow = require(script.Parent.Parent.ReactComponents.PartCollisionModificationWindow);
-local PartDurabilityModificationWindow = require(script.Parent.Parent.ReactComponents.PartDurabilityModificationWindow);
-local PartSurfaceModificationWindow = require(script.Parent.Parent.ReactComponents.PartSurfaceModificationWindow);
-local BuildingToolsSelector = require(script.Parent.Parent.ReactComponents.BuildingToolsSelector);
+local ReactComponents = script.Parent.Parent.ReactComponents;
+local PartPositionModificationWindow = require(ReactComponents.PartPositionModificationWindow);
+local PartMaterialModificationWindow = require(ReactComponents.PartMaterialModificationWindow);
+local PartOrientationModificationWindow = require(ReactComponents.PartOrientationModificationWindow);
+local PartCreationWindow = require(ReactComponents.PartCreationWindow);
+local PartColorModificationWindow = require(ReactComponents.PartColorModificationWindow);
+local PartAnchorModificationWindow = require(ReactComponents.PartAnchorModificationWindow);
+local PartCollisionModificationWindow = require(ReactComponents.PartCollisionModificationWindow);
+local PartDurabilityModificationWindow = require(ReactComponents.PartDurabilityModificationWindow);
+local PartSurfaceModificationWindow = require(ReactComponents.PartSurfaceModificationWindow);
+local BuildingToolsSelector = require(ReactComponents.BuildingToolsSelector);
 
 local player = game:GetService("Players").LocalPlayer;
 
@@ -83,7 +85,7 @@ local function BuildingToolsContainer()
         {
           name = "MoveButton";
           iconImage = "rbxassetid://17547020218";
-          onClick = function() setSelectedWindow(React.createElement(PartOrientationModificationWindow, globalProps)); end;
+          onClick = function() setSelectedWindow(React.createElement(PartPositionModificationWindow, globalProps)); end;
         }, {
           name = "ResizeButton";
           iconImage = "rbxassetid://17547037235";

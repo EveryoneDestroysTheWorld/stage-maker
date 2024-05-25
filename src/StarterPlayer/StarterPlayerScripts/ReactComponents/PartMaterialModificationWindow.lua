@@ -1,9 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
-local Window = require(script.Parent.Parent.ReactComponents.Window);
-local Dropdown = require(script.Parent.Parent.ReactComponents.Dropdown);
-local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
-local NumberInput = require(script.Parent.Parent.ReactComponents.NumberInput);
+local Window = require(script.Parent.Window);
+local Dropdown = require(script.Parent.Dropdown);
+local Checkbox = require(script.Parent.Checkbox);
+local NumberInput = require(script.Parent.NumberInput);
 
 type PartMaterialModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 

@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
-local Window = require(script.Parent.Parent.ReactComponents.Window);
-local Checkbox = require(script.Parent.Parent.ReactComponents.Checkbox);
+local Window = require(script.Parent.Window);
+local Checkbox = require(script.Parent.Checkbox);
 
 type PartCollisionModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ()};
 
