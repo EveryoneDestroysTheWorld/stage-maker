@@ -56,22 +56,29 @@ local function PartOrientationModificationWindow(props: PartOrientationModificat
     local handles = React.createElement("Handles", {
       Adornee = lastPart;
       Name = "Handles";
-      [React.Event.MouseDrag] = function(self, axis, relativeAngle)
+      [React.Event.MouseDrag] = function(self, face, distance)
 
-        local part = props.parts[1];
-        if part then
+        local axis = {
+          [Enum.NormalId.Right] = lastPart.CFrame.RightVector,
+          [Enum.NormalId.Left] = -lastPart.CFrame.RightVector,
+          [Enum.NormalId.Top] = lastPart.CFrame.UpVector, 
+          [Enum.NormalId.Bottom] = -lastPart.CFrame.UpVector,
+          [Enum.NormalId.Front] = lastPart.CFrame.LookVector,
+          [Enum.NormalId.Back] = -lastPart.CFrame.LookVector,
+        };
+
+        if lastPart then
           
-          props.updateParts({CFrame = originalCFrame * CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle)});
+          props.updateParts({CFrame = originalCFrame + axis[face] * distance});
 
         end
 
       end;
       [React.Event.MouseButton1Down] = function()
 
-        local part = props.parts[1];
-        if part then
+        if lastPart then
           
-          originalCFrame = part.CFrame;
+          originalCFrame = lastPart.CFrame;
           
         end
 
