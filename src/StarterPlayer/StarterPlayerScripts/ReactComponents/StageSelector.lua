@@ -104,6 +104,7 @@ local function StageSelector(props: StageSelectorProps)
   React.useEffect(function()
   
     TweenService:Create(scrollingFrameRef.current, TweenInfo.new(0.25, Enum.EasingStyle.Sine), {CanvasPosition = Vector2.new(if selectedStageIndex > 1 then (selectedStageIndex - 1) * 300 + (15 * (selectedStageIndex - 1)) else 0, 0)}):Play();
+    props.onStageSelect(stages[selectedStageIndex - 1]);
 
   end, {selectedStageIndex});
   
