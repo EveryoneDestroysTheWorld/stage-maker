@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local ContextActionService = game:GetService("ContextActionService");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local StageButton = require(script.Parent.StageButton);
+local TweenService = game:GetService("TweenService");
 
 type StageSelectorProps = {onStageSelect: (stage: any) -> (); onStageConfirm: (stage: any) -> ()};
 
@@ -98,6 +99,13 @@ local function StageSelector(props: StageSelectorProps)
     end;
 
   end, {stages, selectedStageIndex});
+
+  local scrollingFrameRef = React.createRef();
+  React.useEffect(function()
+  
+    TweenService:Create(scrollingFrameRef.current, TweenInfo.new(0.25, Enum.EasingStyle.Sine), {CanvasPosition = Vector2.new(if selectedStageIndex > 1 then (selectedStageIndex - 1) * 300 + (15 * (selectedStageIndex - 1)) else 0, 0)}):Play();
+
+  end, {selectedStageIndex});
   
   return React.createElement("ScrollingFrame", {
     BackgroundTransparency = 1;
@@ -105,8 +113,8 @@ local function StageSelector(props: StageSelectorProps)
     Size = UDim2.new(1, 0, 0, 150);
     CanvasSize = UDim2.new(1, if #stages > 0 then #stages * 300 + (15 * #stages) else 0, 0, 0);
     ScrollingDirection = Enum.ScrollingDirection.X;
-    CanvasPosition = Vector2.new(if selectedStageIndex > 1 then (selectedStageIndex - 1) * 300 + (15 * (selectedStageIndex - 1)) else 0, 0);
     ScrollBarThickness = 0;
+    ref = scrollingFrameRef;
   }, {
     React.createElement("UIListLayout", {
       Name = "UIListLayout";
