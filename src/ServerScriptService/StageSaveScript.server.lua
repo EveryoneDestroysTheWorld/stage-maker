@@ -67,29 +67,19 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
 
     -- Package the stage.
     type Vector3Serialization = {X: number; Y: number; Z: number};
-    type PackageInstance = {{
-      type: string;
-      properties: {
-        Color: string?;
-        CastShadow: boolean;
-        Material: number;
-        Size: Vector3Serialization;
-        Position: Vector3Serialization;
-        Orientation: Vector3Serialization;
-        Shape: number?;
-        Name: string;
-      }
-    }};
-    local package: {{PackageInstance}} = {{}};
+    local package: Stage.StageBuildData = {{}};
     local chunkIndex = 1;
     local skippedInstances = 0;
     for index, instance in ipairs(stageBuild:GetChildren()) do
       
       if instance:IsA("BasePart") then 
         
-        local packageInstance: PackageInstance = {
+        local packageInstance: Stage.StageBuildDataItem = {
           type = "Part";
           properties = {
+            Anchored = instance.Anchored;
+            BaseDurability = instance:GetAttribute("BaseDurability");
+            CanCollide = instance.CanCollide;
             Color = instance.Color:ToHex();
             CastShadow = instance.CastShadow;
             Material = instance.Material.Value;
@@ -110,7 +100,10 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
             };
             Name = instance.Name;
             Shape = if instance:IsA("Part") then instance.Shape.Value else nil;
-          }
+          };
+          attributes = {
+            BaseDurability = instance:GetAttribute("BaseDurability");
+          };
         };
         
         table.insert(package[chunkIndex], packageInstance);
@@ -240,19 +233,21 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
           setEnum(Enum.Material, property, value);
 
-        elseif ({Name = 1; CastShadow = 1;})[property] then
+        elseif ({Name = 1; CastShadow = 1; Anchored = 1})[property] then
 
           instance[property] = value;
-
-        elseif property == "BaseDurability" then
-
-          instance:SetAttribute("BaseDurability", value);
 
         else
 
           warn(`Unknown property: {property}`);
 
         end;
+
+      end;
+
+      for attribute, value in pairs(instanceData.attributes) do
+
+        instance:SetAttribute(attribute, value);
 
       end;
 

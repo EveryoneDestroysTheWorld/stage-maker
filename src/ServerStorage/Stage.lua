@@ -84,6 +84,14 @@ local Stage = {
 
 export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageMetadataObject & StageMethods & StageEvents;
 
+export type StageBuildDataItem = {
+  type: string; 
+  properties: {[string]: any};
+  attributes: {[string]: any};
+};
+
+export type StageBuildData = {{StageBuildDataItem}};
+
 local events = {};
 
 function Stage.new(properties: {[string]: any}?): Stage
@@ -224,7 +232,7 @@ function Stage.__index:delete(): ()
   
 end
 
-function Stage.__index:getBuildData(): {{{type: string; properties: {[string]: any}}}}
+function Stage.__index:getBuildData(): StageBuildData
 
   local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
   local buildDataEncoded = {};
