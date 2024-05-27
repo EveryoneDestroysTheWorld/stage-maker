@@ -178,8 +178,9 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
   assert(not isDownloading, "The server is currently downloading a stage. Please cancel the request or wait until the download completes before making a new request.");
 
   -- Get the stage from the DataStore.
-  ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player);
-  local stageBuildData = Stage.fromID(stageID):getBuildData();
+  ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player, stageID);
+  currentStage = Stage.fromID(stageID);
+  local stageBuildData = currentStage:getBuildData();
 
   -- Empty the stage.
   for _, instance in ipairs(workspace.Stage:GetChildren()) do
