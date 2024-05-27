@@ -138,7 +138,7 @@ function Stage.__index:verifyID(): ()
     local canGetStage = pcall(function() Stage.fromID(possibleID) end);
     if not canGetStage then 
 
-      self.ID = possibleID;
+      self:updateMetadata({ID = possibleID});
 
     end;
     

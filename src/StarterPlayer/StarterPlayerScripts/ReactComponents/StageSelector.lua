@@ -72,7 +72,7 @@ local function StageSelector(props: StageSelectorProps)
     for index, stage in ipairs(stages) do
 
       table.insert(stageComponents, React.createElement(StageButton, {
-        Name = stage.name;
+        stage = stage;
         LayoutOrder = index + 1;
         stageName = stage.name;
         isSelected = selectedStageIndex == index + 1;
@@ -83,6 +83,7 @@ local function StageSelector(props: StageSelectorProps)
         end;
         onConfirm = function()
 
+          print(stage);
           props.onStageConfirm(stage);
 
         end;
@@ -127,7 +128,7 @@ local function StageSelector(props: StageSelectorProps)
     });
     React.createElement(StageButton, {
       Name = "CreateStageContainer";
-      stageName = "CREATE NEW STAGE";
+      stage = {name = "CREATE NEW STAGE"};
       isSelected = selectedStageIndex == 1;
       LayoutOrder = 1;
       onSelect = function()

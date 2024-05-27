@@ -178,6 +178,7 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
   -- Get the stage from the DataStore.
   ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player);
+  print(stageID);
   local stageBuildData = Stage.fromID(stageID):getBuildData();
 
   -- Empty the stage.
@@ -256,7 +257,7 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
     partsAudited += 1;
     
-    ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(partsAudited, totalParts);
+    ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
 
   end;
 

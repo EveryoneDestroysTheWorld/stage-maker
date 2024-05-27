@@ -3,7 +3,7 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local icons = require(ReplicatedStorage.Client.Icons);
 
 type StageButtonProps = {
-  stageName: string;
+  stage: any;
   Name: string;
   onSelect: () -> ();
   onConfirm: () -> ();
@@ -12,6 +12,27 @@ type StageButtonProps = {
 }
 
 local function StageButton(props: StageButtonProps)
+
+  local downloadProgress, setDownloadProgress = React.useState(nil);
+  React.useEffect(function()
+  
+    local downloadProgressEvent = ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged.OnClientEvent:Connect(function(stageID, partsDownloaded, totalParts)
+    
+      if stageID == props.stage.ID then
+
+        setDownloadProgress(partsDownloaded / totalParts);
+
+      end;
+
+    end);
+
+    return function()
+
+      downloadProgressEvent:Disconnect();
+
+    end;
+
+  end, {props.stage});
 
   return React.createElement("Frame", {
     Name = props.Name;
@@ -68,7 +89,7 @@ local function StageButton(props: StageButtonProps)
       });
       StageNameLabel = React.createElement("TextLabel", {
         BackgroundTransparency = 1;
-        Text = props.stageName;
+        Text = props.stage.name;
         Size = UDim2.new(1, 0, 0, 20);
         TextColor3 = Color3.new(1, 1, 1);
         TextXAlignment = Enum.TextXAlignment.Left;
@@ -78,7 +99,18 @@ local function StageButton(props: StageButtonProps)
         LayoutOrder = 2;
       });
     });
-  })
+    DownloadProgressFrame = if downloadProgress then React.createElement("Frame", {
+      Position = UDim2.new(0.5, 0, 1, 8);
+      Size = UDim2.new(1, -10, 0, 2);
+      AnchorPoint = Vector2.new(0.5, 0.5);
+      BackgroundColor3 = Color3.fromRGB(58, 58, 58);
+    }, {
+      CurrentProgressFrame = React.createElement("Frame", {
+        Size = UDim2.new(downloadProgress, 0, 1, 0);
+        BackgroundColor3 = Color3.fromRGB(76, 255, 88);
+      })
+    }) else nil;
+  });
 
 end;
 

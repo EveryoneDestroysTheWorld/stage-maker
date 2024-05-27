@@ -155,6 +155,8 @@ local function StagesScreen(props: StageScreenProps)
 
           end;
 
+          ReplicatedStorage.Shared.Functions.DownloadStage:InvokeServer(stage.ID);
+
         end;
       });
     });
@@ -164,7 +166,7 @@ local function StagesScreen(props: StageScreenProps)
       Size = UDim2.new(1, 0, 0, 60);
     }, {
       UIListLayout = React.createElement("UIListLayout", {
-        HorizontalAlignment = Enum.HorizontalAlignment.Right;
+        HorizontalAlignment = Enum.HorizontalAlignment.Left;
         Padding = UDim.new(0, 15);
         FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;
