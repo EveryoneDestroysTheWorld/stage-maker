@@ -4,7 +4,7 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local StageButton = require(script.Parent.StageButton);
 local TweenService = game:GetService("TweenService");
 
-type StageSelectorProps = {onStageSelect: (stage: any) -> (); onStageConfirm: (stage: any) -> ()};
+type StageSelectorProps = {onStageSelect: (stage: any) -> (); onStageConfirm: (stage: any) -> (); onDownloadComplete: () -> ()};
 
 local function StageSelector(props: StageSelectorProps)
 
@@ -83,10 +83,10 @@ local function StageSelector(props: StageSelectorProps)
         end;
         onConfirm = function()
 
-          print(stage);
           props.onStageConfirm(stage);
 
         end;
+        onDownloadComplete = props.onDownloadComplete;
       }));
 
     end;

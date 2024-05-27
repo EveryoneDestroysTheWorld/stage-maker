@@ -158,6 +158,7 @@ local function StagesScreen(props: StageScreenProps)
           ReplicatedStorage.Shared.Functions.DownloadStage:InvokeServer(stage.ID);
 
         end;
+        onDownloadComplete = props.onStageDownloaded;
       });
     });
     Options = React.createElement("Frame", {

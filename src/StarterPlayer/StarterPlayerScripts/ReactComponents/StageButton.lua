@@ -7,6 +7,7 @@ type StageButtonProps = {
   Name: string;
   onSelect: () -> ();
   onConfirm: () -> ();
+  onDownloadComplete: () -> ();
   LayoutOrder: number;
   isSelected: boolean;
 }
@@ -26,9 +27,21 @@ local function StageButton(props: StageButtonProps)
 
     end);
 
+    local downloadCompleteEvent = ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted.OnClientEvent:Connect(function(stageID)
+    
+      if stageID == props.stage.ID then
+
+        setDownloadProgress(nil);
+        props.onDownloadComplete();
+
+      end;
+
+    end);
+
     return function()
 
       downloadProgressEvent:Disconnect();
+      downloadCompleteEvent:Disconnect();
 
     end;
 

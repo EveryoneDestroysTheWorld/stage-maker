@@ -122,8 +122,11 @@ end
 
 function Stage.fromID(id: string): Stage
   
-  local stageData = DataStoreService:GetDataStore("StageMetadata"):GetAsync(id);
-  assert(stageData, `Stage {id} doesn't exist yet.`);
+  local encodedStageData = DataStoreService:GetDataStore("StageMetadata"):GetAsync(id);
+  assert(encodedStageData, `Stage {id} doesn't exist yet.`);
+  
+  local stageData = HttpService:JSONDecode(encodedStageData);
+  stageData.ID = id;
   
   return Stage.new(stageData);
   
@@ -194,12 +197,23 @@ function Stage.__index:delete(): ()
   
   -- Delete build data.
   local stageBuildDataDataStore = DataStoreService:GetDataStore("StageBuildData");
-  local keys = stageBuildDataDataStore:ListKeysAsync(self.ID);
-  for _, key in ipairs(keys) do
+  local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
+  repeat
 
-    stageBuildDataDataStore:RemoveAsync(key);
+    local keys = keyList:GetCurrentPage();
+    for _, key in ipairs(keys) do
 
-  end
+      stageBuildDataDataStore:RemoveAsync(key.KeyName);
+  
+    end;
+
+    if not keyList.IsFinished then
+
+      keyList:AdvanceToNextPageAsync();
+
+    end;
+
+  until keyList.IsFinished;
   
   -- Delete metadata.
   DataStoreService:GetDataStore("StageMetadata"):RemoveAsync(self.ID);

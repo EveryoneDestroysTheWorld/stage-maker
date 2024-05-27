@@ -6,6 +6,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local ServerStorage = game:GetService("ServerStorage");
 local HttpService = game:GetService("HttpService");
+local Players = game:GetService("Players");
 
 local Player = require(ServerStorage.Player);
 local Stage = require(ServerStorage.Stage);
@@ -178,11 +179,10 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
   -- Get the stage from the DataStore.
   ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player);
-  print(stageID);
   local stageBuildData = Stage.fromID(stageID):getBuildData();
 
   -- Empty the stage.
-  for _, instance in ipairs(workspace.Stage) do
+  for _, instance in ipairs(workspace.Stage:GetChildren()) do
 
     instance:Destroy();
 
@@ -243,6 +243,10 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
           instance[property] = value;
 
+        elseif property == "BaseDurability" then
+
+          instance:SetAttribute("BaseDurability", value);
+
         else
 
           warn(`Unknown property: {property}`);
@@ -253,16 +257,21 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
       instance.Parent = workspace.Stage;
 
-    end;
+      partsAudited += 1;
+      ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
 
-    partsAudited += 1;
-    
-    ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
+    end;
 
   end;
 
   -- Reset the status so that we can download more stages.
   isDownloading = false;
-  ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients();
+  ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients(stageID);
+
+  for _, player in ipairs(Players:GetPlayers()) do
+
+    player:LoadCharacter();
+
+  end;
 
 end;
