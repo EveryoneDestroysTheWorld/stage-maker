@@ -33,37 +33,6 @@ local function StagesScreen(props: StageScreenProps)
         PaddingLeft = UDim.new(0, 15);
         PaddingRight = UDim.new(0, 15);
       });
-      LobbyTeleportButton = React.createElement("TextButton", {
-        Text = "";
-        BackgroundTransparency = 1;
-        Size = UDim2.new(0, 180, 0, 30);
-        [React.Event.Activated] = function()
-
-          TeleportService:Teleport(15555144468);
-
-        end;
-      }, {
-        UIListLayout = React.createElement("UIListLayout", {
-          FillDirection = Enum.FillDirection.Horizontal;
-          Padding = UDim.new(0, 10);
-          VerticalAlignment = Enum.VerticalAlignment.Center;
-          SortOrder = Enum.SortOrder.LayoutOrder;
-        });
-        BackIcon = React.createElement("ImageLabel", {
-          BackgroundTransparency = 1;
-          Size = UDim2.new(0, 25, 0, 25);
-          Image = icons.arrowBack;
-        });
-        TextLabel = React.createElement("TextLabel", {
-          BackgroundTransparency = 1;
-          TextColor3 = Color3.new(1, 1, 1);
-          Text = "BACK TO LOBBY";
-          TextSize = 20;
-          Size = UDim2.new(1, -35, 0, 30);
-          FontFace = Font.fromId(11702779517, Enum.FontWeight.Medium);
-          TextXAlignment = Enum.TextXAlignment.Left;
-        })
-      })
     });
     Content = React.createElement("Frame", {
       BackgroundTransparency = 1;
