@@ -1,14 +1,49 @@
 --!strict
--- StageSaveScript.lua
+-- StageSaveScript.server.lua
 -- Written by Christian "Sudobeast" Toney
 -- This script responds to stage save requests.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local DataStoreService = game:GetService("DataStoreService");
 local ServerStorage = game:GetService("ServerStorage");
 local HttpService = game:GetService("HttpService");
 
+local Player = require(ServerStorage.Player);
+
 local isSaving = false;
+
+local currentStage = nil;
+
+local function getCurrentStage(player)
+
+  if not currentStage then
+
+    currentStage = Player.fromID(player.UserId, true):createStage();
+
+  end;
+
+  return currentStage;
+
+end;
+
+ReplicatedStorage.Shared.Functions.GetStages.OnServerInvoke = function(player)
+
+  local stages = {};
+
+  local success, message = pcall(function()
+  
+    stages = Player.fromID(player.UserId):getStages();
+
+  end);
+
+  if not success then
+
+    warn(`Couldn't get Player {player.UserId}'s stages: {message}`);
+
+  end;
+
+  return stages;
+
+end;
 
 ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(player)
 
@@ -19,15 +54,16 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
   isSaving = true;
   
   local _, message = pcall(function()
+
+    -- Start the process!
+    ReplicatedStorage.Shared.Events.StageBuildDataSaveStarted:FireAllClients(player);
     
     -- Get the current stage info.
-    --local stage = ServerStorage.Functions.GetStage:Invoke();
-    local stage = require(ServerStorage.Stage)
+    local stage = getCurrentStage(player);
     local stageBuild: Model? = workspace:FindFirstChild("Stage");
     assert(stageBuild and stageBuild:IsA("Model"), "Couldn't find Stage the Workspace.");
 
     -- Package the stage.
-    ReplicatedStorage.Shared.Events.StageBuildDataSaveStarted:FireAllClients(player);
     type Vector3Serialization = {X: number; Y: number; Z: number};
     type PackageInstance = {{
       type: string;
@@ -105,12 +141,16 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
 
     -- Save the stage into a DataStore.
     local onBuildDataUpdateProgressChanged;
-    onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged:Connect(function(current, total)
+    onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged.Event:Connect(function(current, total)
 
       ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
 
-    end)
+    end);
+    stage:updateMetadata({
+      timeUpdated = DateTime.now().UnixTimestampMillis;
+    });
     stage:updateBuildData(serializedPackage);
+    onBuildDataUpdateProgressChanged:Disconnect();
 
     -- 
     print("Successfully saved the stage's build data.");
@@ -119,6 +159,7 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
   end);
   
   isSaving = false;
+  
   
   if message then
     

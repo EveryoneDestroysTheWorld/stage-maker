@@ -16,6 +16,10 @@
     "ServerScriptService": {
       "$path": "src/ServerScriptService"
     },
+    "ServerStorage": {
+      "$path": "src/ServerStorage",
+      "$ignoreUnknownInstances": true
+    },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "$path": "src/StarterPlayer/StarterPlayerScripts"
@@ -26,7 +30,8 @@
       }
     },
     "StarterGui": {
-      "$path": "src/StarterGui"
+      "$path": "src/StarterGui",
+      "$ignoreUnknownInstances": true
     }
   }
 }
