@@ -5,6 +5,7 @@ local ReactComponents = script.Parent.Parent.ReactComponents;
 local StagesScreen = require(ReactComponents.StagesScreen);
 local TweenService = game:GetService("TweenService");
 local Lighting = game:GetService("Lighting");
+local StarterGui = game:GetService("StarterGui");
 
 local player = game:GetService("Players").LocalPlayer;
 
@@ -14,6 +15,8 @@ handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = player.PlayerGui;
 handle.DisplayOrder = 1;
 handle.Enabled = true;
+
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false);
 
 local root = ReactRoblox.createRoot(handle);
 
@@ -25,6 +28,7 @@ local function MainMenuContainer()
 
         handle.Enabled = false;
         TweenService:Create(Lighting.Blur, TweenInfo.new(), {Size = 0}):Play();
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true);
 
       end;
     });

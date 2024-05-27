@@ -133,7 +133,7 @@ local function StageSelector(props: StageSelectorProps)
       onSelect = function()
         setSelectedStageIndex(1);
       end;
-      onConfirm = props.onStageConfirm;
+      onConfirm = function() props.onStageConfirm() end;
     });
     stageComponents;
   });
