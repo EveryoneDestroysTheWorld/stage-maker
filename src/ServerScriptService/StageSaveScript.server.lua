@@ -142,7 +142,7 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
 
     -- Save the stage into a DataStore.
     local onBuildDataUpdateProgressChanged;
-    onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged.Event:Connect(function(current, total)
+    onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged:Connect(function(current, total)
 
       ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
 
@@ -151,6 +151,7 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
       timeUpdated = DateTime.now().UnixTimestampMillis;
     });
     stage:updateBuildData(serializedPackage);
+    task.wait();
     onBuildDataUpdateProgressChanged:Disconnect();
 
     -- 

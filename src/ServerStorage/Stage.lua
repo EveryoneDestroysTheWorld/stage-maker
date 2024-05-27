@@ -66,16 +66,16 @@ type StageMethods = {
 
 type StageEvents = {
   -- Fires when the stage metadata is updated.
-  onMetadataUpdate: BindableEvent;
+  onMetadataUpdate: RBXScriptSignal;
   
   -- Fires when the build data is completely updated.
-  onBuildDataUpdate: BindableEvent;
+  onBuildDataUpdate: RBXScriptSignal;
   
   -- Fires when the build data is partially updated. 
-  onBuildDataUpdateProgressChanged: BindableEvent;
+  onBuildDataUpdateProgressChanged: RBXScriptSignal;
   
   -- Fires when the stage is deleted.
-  onDelete: BindableEvent;
+  onDelete: RBXScriptSignal;
 }
 
 local Stage = {
@@ -83,6 +83,8 @@ local Stage = {
 };
 
 export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageMetadataObject & StageMethods & StageEvents;
+
+local events = {};
 
 function Stage.new(properties: {[string]: any}?): Stage
   
@@ -92,8 +94,14 @@ function Stage.new(properties: {[string]: any}?): Stage
     timeUpdated = DateTime.now().UnixTimestampMillis;
     members = {};
   };
-  setmetatable(stage, {__index = Stage.__index});
-  
+
+  for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
+
+    events[eventName] = Instance.new("BindableEvent");
+    stage[eventName] = events[eventName].Event;
+
+  end
+
   if properties then
 
     stage.ID = if properties.ID then properties.ID else stage.ID;
@@ -105,12 +113,8 @@ function Stage.new(properties: {[string]: any}?): Stage
     stage.members = if properties.members then properties.members else stage.members;
 
   end;
-  
-  for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
 
-    stage[eventName] = Instance.new("BindableEvent");
-
-  end
+  setmetatable(stage, {__index = Stage.__index});
   
   return stage :: any;
   
@@ -150,10 +154,10 @@ function Stage.__index:updateBuildData(newBuildData: {string}): ()
   for index, chunk in ipairs(newBuildData) do
 
     DataStore.StageBuildData:SetAsync(`{self.ID}/{index}`, chunk);
-    self.onBuildDataUpdateProgressChanged:Fire(index, #newBuildData);
+    events.onBuildDataUpdateProgressChanged:Fire(index, #newBuildData);
 
   end
-  self.onBuildDataUpdate:Fire();
+  events.onBuildDataUpdate:Fire();
 
 end
 
@@ -181,7 +185,7 @@ function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
 
   end;
   
-  self.onMetadataUpdate:Fire(newData);
+  events.onMetadataUpdate:Fire(newData);
   
 end
 
@@ -202,7 +206,7 @@ function Stage.__index:delete(): ()
   
   -- Tell the player.
   print(`Stage {self.ID} has been successfully deleted.`);
-  self.onDelete:Fire();
+  events.onDelete:Fire();
   
 end
 
