@@ -6,6 +6,7 @@
 local DataStoreService = game:GetService("DataStoreService");
 local DataStore = {
   StageMetadata = DataStoreService:GetDataStore("StageMetadata");
+  StageBuildData = DataStoreService:GetDataStore("StageBuildData");
 }
 local HttpService = game:GetService("HttpService");
 
@@ -146,10 +147,9 @@ function Stage.__index:updateBuildData(newBuildData: {string}): ()
   
   self:verifyID();
   
-  local datastore = DataStoreService:GetDataStore("StageBuildData");
   for index, chunk in ipairs(newBuildData) do
 
-    datastore:SetAsync(`{self.ID}/{index}`, chunk);
+    DataStore.StageBuildData:SetAsync(`{self.ID}/{index}`, chunk);
     self.onBuildDataUpdateProgressChanged:Fire(index, #newBuildData);
 
   end
@@ -205,5 +205,30 @@ function Stage.__index:delete(): ()
   self.onDelete:Fire();
   
 end
+
+function Stage.__index:getBuildData(): {{{type: string; properties: {[string]: any}}}}
+
+  local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
+  local buildDataEncoded = {};
+  repeat
+
+    local keys = keyList:GetCurrentPage();
+    for _, key in ipairs(keys) do
+
+      table.insert(buildDataEncoded, HttpService:JSONDecode(DataStore.StageBuildData:GetAsync(key.KeyName)));
+  
+    end;
+
+    if not keyList.IsFinished then
+
+      keyList:AdvanceToNextPageAsync();
+
+    end;
+
+  until keyList.IsFinished;
+
+  return buildDataEncoded;
+
+end;
 
 return Stage;

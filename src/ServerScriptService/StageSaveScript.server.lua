@@ -8,6 +8,7 @@ local ServerStorage = game:GetService("ServerStorage");
 local HttpService = game:GetService("HttpService");
 
 local Player = require(ServerStorage.Player);
+local Stage = require(ServerStorage.Stage);
 
 local isSaving = false;
 
@@ -167,4 +168,99 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
     
   end
   
-end
+end;
+
+local isDownloading = false;
+ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(player, stageID)
+
+  assert(not isDownloading, "The server is currently downloading a stage. Please cancel the request or wait until the download completes before making a new request.");
+
+  -- Get the stage from the DataStore.
+  ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player);
+  local stageBuildData = Stage.fromID(stageID):getBuildData();
+
+  -- Empty the stage.
+  for _, instance in ipairs(workspace.Stage) do
+
+    instance:Destroy();
+
+  end;
+
+  -- Calculate the total parts.
+  local totalParts = 0;
+  for _, page in ipairs(stageBuildData) do
+
+    for _, instance in ipairs(page) do
+
+      totalParts += 1;
+
+    end;
+
+  end;
+
+  -- Add the parts to the stage model.
+  local partsAudited = 0;
+  for _, page in ipairs(stageBuildData) do
+
+    for _, instanceData in ipairs(page) do
+
+      local instance = Instance.new(instanceData.type) :: any;
+      local function setEnum(enum, property, value)
+
+        for _, enumItem in ipairs(enum:GetEnumItems()) do
+
+          if enumItem.Value == value then
+            
+            instance[property] = enumItem;
+
+          end;
+
+        end;  
+
+      end;
+
+      for property, value in pairs(instanceData.properties) do
+
+        if property == "Color" then
+
+          instance[property] = Color3.fromHex(value);
+
+        elseif ({Size = 1; Position = 1; Orientation = 1})[property] then
+
+          instance[property] = Vector3.new(value.X, value.Y, value.Z);
+
+        elseif property == "Shape" then
+
+          setEnum(Enum.PartType, property, value);
+
+        elseif property == "Material" then
+
+          setEnum(Enum.Material, property, value);
+
+        elseif ({Name = 1; CastShadow = 1;})[property] then
+
+          instance[property] = value;
+
+        else
+
+          warn(`Unknown property: {property}`);
+
+        end;
+
+      end;
+
+      instance.Parent = workspace.Stage;
+
+    end;
+
+    partsAudited += 1;
+    
+    ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(partsAudited, totalParts);
+
+  end;
+
+  -- Reset the status so that we can download more stages.
+  isDownloading = false;
+  ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients();
+
+end;
