@@ -64,7 +64,32 @@ local function StageSelector(props: StageSelectorProps)
 
       end;
 
-    end;  
+    end;
+
+    local onStageDelete = ReplicatedStorage.Shared.Events.StageDeleted.OnClientEvent:Connect(function(stageID)
+    
+      for stageIndex, stage in ipairs(stages) do
+
+        if stage.ID == stageID then
+
+          -- Remove the stage from the list.
+          table.remove(stages, stageIndex);
+          setStages(stages);
+
+          -- Fix the index.
+          if stageIndex + 1 <= selectedStageIndex then
+
+            setSelectedStageIndex(selectedStageIndex - 1);
+  
+          end;
+
+          break;
+
+        end;
+
+      end;
+
+    end);
     
     ContextActionService:BindActionAtPriority("LoadStage", loadStage, false, 2, Enum.KeyCode.Return, Enum.KeyCode.KeypadEnter);
 
@@ -95,6 +120,7 @@ local function StageSelector(props: StageSelectorProps)
 
     return function()
 
+      onStageDelete:Disconnect();
       ContextActionService:UnbindAction("LoadStage");
 
     end;

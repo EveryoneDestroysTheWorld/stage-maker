@@ -1,9 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
-local TeleportService = game:GetService("TeleportService");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local icons = require(ReplicatedStorage.Client.Icons);
 local StatusBubble = require(script.Parent.StatusBubble);
 local StageSelector = require(script.Parent.StageSelector);
+local BottomButton = require(script.Parent.BottomButton);
 
 type StageScreenProps = {onStageDownloaded: () -> ()};
 
@@ -152,6 +152,7 @@ local function StagesScreen(props: StageScreenProps)
           if not stage then
 
             props.onStageDownloaded();
+            return;
 
           end;
 
@@ -177,42 +178,34 @@ local function StagesScreen(props: StageScreenProps)
         PaddingLeft = UDim.new(0, 30);
         PaddingRight = UDim.new(0, 30);
       });
-      DownloadStage = React.createElement("TextButton", {
-        BackgroundTransparency = 1;
-        LayoutOrder = 1;
-        Size = UDim2.new(0, 190, 0, 30);
-      }, {
-        UIListLayout = React.createElement("UIListLayout", {
-          Padding = UDim.new(0, 10);
-          FillDirection = Enum.FillDirection.Horizontal;
-          SortOrder = Enum.SortOrder.LayoutOrder;
-          VerticalAlignment = Enum.VerticalAlignment.Center;
-        });
-        KeyLabel = React.createElement("TextLabel", {
-          LayoutOrder = 1;
-          BackgroundTransparency = 0.65;
-          Text = "ENTER";
-          TextColor3 = Color3.new(1, 1, 1);
-          TextSize = 10;
-          Size = UDim2.new(0, 50, 0, 25);
-          FontFace = Font.fromId(11702779517, Enum.FontWeight.Bold);
-          TextXAlignment = Enum.TextXAlignment.Center;
-        }, {
-          UICorner = React.createElement("UICorner", {
-            CornerRadius = UDim.new(0, 5);
-          });
-        });
-        DescriptionLabel = React.createElement("TextLabel", {
-          LayoutOrder = 2;
-          BackgroundTransparency = 1;
-          Text = "DOWNLOAD STAGE";
-          TextColor3 = Color3.new(1, 1, 1);
-          TextSize = 14;
-          Size = UDim2.new(1, -60, 1, 0);
-          FontFace = Font.fromId(11702779517);
-          TextXAlignment = Enum.TextXAlignment.Left;
-        });
-      })
+      DownloadStage = React.createElement(BottomButton, {
+        description = "Download stage";
+        keyName = "Enter";
+        onActivate = function() 
+        
+          if not selectedStage then
+
+            props.onStageDownloaded();
+            return;
+
+          end;
+          ReplicatedStorage.Shared.Functions.DownloadStage:InvokeServer(selectedStage.ID);
+
+        end;
+      });
+      DeleteStage = React.createElement(BottomButton, {
+        description = "Delete stage";
+        keyName = "Del";
+        onActivate = function() 
+        
+          if selectedStage then
+
+            ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(selectedStage.ID);
+
+          end;
+
+        end;
+      });
     });
   });
 

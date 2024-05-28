@@ -165,6 +165,13 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
   
 end;
 
+ReplicatedStorage.Shared.Functions.DeleteStage.OnServerInvoke = function(player, stageID)
+
+  Stage.fromID(stageID):delete();
+  ReplicatedStorage.Shared.Events.StageDeleted:FireAllClients(stageID);
+
+end;
+
 local isDownloading = false;
 ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(player, stageID)
 
