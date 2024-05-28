@@ -4,6 +4,11 @@
 -- This module is a class that represents a stage.
 
 local DataStoreService = game:GetService("DataStoreService");
+local DataStore = {
+  StageMetadata = DataStoreService:GetDataStore("StageMetadata");
+  StageBuildData = DataStoreService:GetDataStore("StageBuildData");
+}
+local HttpService = game:GetService("HttpService");
 
 type PermissionOverride = {
   ["stage.delete"]: boolean?;
@@ -39,19 +44,27 @@ type StageMetadataObject = {
   --Time in seconds when the stage was last updated.
   timeUpdated: number;
   
-  -- A list of StageMemberObject.
-  members: {StageMemberObject};
-  
   -- The stage's description.
   description: string?;
+
+  -- The stage's members.
+  members: {
+    {
+      ID: string;
+      role: "admin";
+    }
+  };
   
-  -- [Methods]
+}
+
+type StageMethods = {
   updateBuildData: (self: StageMetadataObject, newData: NewDataParameter) -> ();
   updateMetadata: (self: StageMetadataObject, newData: NewDataParameter) -> ();
   delete: (self: StageMetadataObject) -> ();
   verifyID: (self: StageMetadataObject) -> ();
-  
-  -- [Events]
+}
+
+type StageEvents = {
   -- Fires when the stage metadata is updated.
   onMetadataUpdate: RBXScriptSignal;
   
@@ -63,40 +76,94 @@ type StageMetadataObject = {
   
   -- Fires when the stage is deleted.
   onDelete: RBXScriptSignal;
-  
 }
 
+local Stage = {
+  __index = {};
+};
 
-local Stage: StageMetadataObject = {} :: StageMetadataObject;
+export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageMetadataObject & StageMethods & StageEvents;
+
+export type StageBuildDataItem = {
+  type: string; 
+  properties: {[string]: any};
+  attributes: {[string]: any};
+};
+
+export type StageBuildData = {{StageBuildDataItem}};
 
 local events = {};
-for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
 
-  events[eventName] = Instance.new("BindableEvent");
-  Stage[eventName] = events[eventName].Event;
+function Stage.new(properties: {[string]: any}?): Stage
+  
+  local stage = {
+    name = "Unnamed Stage";
+    timeCreated = DateTime.now().UnixTimestampMillis;
+    timeUpdated = DateTime.now().UnixTimestampMillis;
+    members = {};
+  };
+
+  for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
+
+    events[eventName] = Instance.new("BindableEvent");
+    stage[eventName] = events[eventName].Event;
+
+  end
+
+  if properties then
+
+    stage.ID = if properties.ID then properties.ID else stage.ID;
+    stage.name = if properties.name then properties.name else stage.name;
+    stage.description = if properties.description then properties.description else stage.description;
+    stage.timeCreated = if properties.timeCreated then properties.timeCreated else stage.timeCreated;
+    stage.timeUpdated = if properties.timeUpdated then properties.timeUpdated else stage.timeUpdated;
+    stage.permissionOverrides = if properties.permissionOverrides then properties.permissionOverrides else stage.permissionOverrides;
+    stage.members = if properties.members then properties.members else stage.members;
+
+  end;
+
+  setmetatable(stage, {__index = Stage.__index});
+  
+  return stage :: any;
   
 end
 
-function Stage:verifyID(): ()
+function Stage.fromID(id: string): Stage
   
-  -- Generate a stage ID.
-  if not self.ID then
+  local encodedStageData = DataStoreService:GetDataStore("StageMetadata"):GetAsync(id);
+  assert(encodedStageData, `Stage {id} doesn't exist yet.`);
+  
+  local stageData = HttpService:JSONDecode(encodedStageData);
+  stageData.ID = id;
+  
+  return Stage.new(stageData);
+  
+end
+
+function Stage.__index:verifyID(): ()
+  
+  while not self.ID do
+
+    -- Generate a stage ID.
+    local possibleID = HttpService:GenerateGUID();
+    local canGetStage = pcall(function() Stage.fromID(possibleID) end);
+    if not canGetStage then 
+
+      self.ID = possibleID;
+      self:updateMetadata({ID = possibleID});
+
+    end;
     
-    self.ID = "#3";
-    
-  end
+  end;
   
 end
 
 -- Edits the stage's metadata.
-function Stage:updateBuildData(newBuildData: {string}): ()
+function Stage.__index:updateBuildData(newBuildData: {string}): ()
   
-  self:verifyID();
-  
-  local datastore = DataStoreService:GetDataStore("StageBuildData");
   for index, chunk in ipairs(newBuildData) do
 
-    datastore:SetAsync(`{self.ID}/{index}`, chunk);
+    DataStore.StageBuildData:SetAsync(`{self.ID}/{index}`, chunk);
     events.onBuildDataUpdateProgressChanged:Fire(index, #newBuildData);
 
   end
@@ -105,20 +172,86 @@ function Stage:updateBuildData(newBuildData: {string}): ()
 end
 
 -- Edits the stage's metadata.
-function Stage:updateMetadata(newData: NewDataParameter): ()
+function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
 
-  self:verifyID();
+  DataStore.StageMetadata:UpdateAsync(self.ID, function(encodedOldMetadata)
   
-  events.onMetadataUpdate:Fire();
+    local newMetadata = HttpService:JSONDecode(encodedOldMetadata or "{}");
+    for key, value in pairs(newData) do
+
+      newMetadata[key] = value;
+
+    end;
+
+    return HttpService:JSONEncode(newMetadata);
+
+  end);
+
+  for key, value in pairs(newData) do
+
+    self[key] = value;
+
+  end;
+  
+  events.onMetadataUpdate:Fire(newData);
   
 end
 
 -- Irrecoverably deletes the stage, including its build data.
-function Stage:delete(): ()
+function Stage.__index:delete(): ()
   
+  -- Delete build data.
+  local stageBuildDataDataStore = DataStoreService:GetDataStore("StageBuildData");
+  local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
+  repeat
+
+    local keys = keyList:GetCurrentPage();
+    for _, key in ipairs(keys) do
+
+      stageBuildDataDataStore:RemoveAsync(key.KeyName);
+  
+    end;
+
+    if not keyList.IsFinished then
+
+      keyList:AdvanceToNextPageAsync();
+
+    end;
+
+  until keyList.IsFinished;
+  
+  -- Delete metadata.
+  DataStoreService:GetDataStore("StageMetadata"):RemoveAsync(self.ID);
+  
+  -- Tell the player.
   print(`Stage {self.ID} has been successfully deleted.`);
   events.onDelete:Fire();
   
 end
+
+function Stage.__index:getBuildData(): StageBuildData
+
+  local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
+  local buildDataEncoded = {};
+  repeat
+
+    local keys = keyList:GetCurrentPage();
+    for _, key in ipairs(keys) do
+
+      table.insert(buildDataEncoded, HttpService:JSONDecode(DataStore.StageBuildData:GetAsync(key.KeyName)));
+  
+    end;
+
+    if not keyList.IsFinished then
+
+      keyList:AdvanceToNextPageAsync();
+
+    end;
+
+  until keyList.IsFinished;
+
+  return buildDataEncoded;
+
+end;
 
 return Stage;

@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local UserInputService = game:GetService("UserInputService");
+local Players = game:GetService("Players");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local ReactComponents = script.Parent.Parent.ReactComponents;
@@ -21,11 +22,17 @@ local handle = Instance.new("ScreenGui");
 handle.Name = "BuildingTools";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = player.PlayerGui;
-handle.Enabled = true;
+handle.Enabled = false;
 
 local root = ReactRoblox.createRoot(handle);
 
 export type BuildingToolsWindowProps = {onClose: () -> ()};
+
+Players.LocalPlayer.CharacterAdded:Connect(function()
+
+  handle.Enabled = true;
+
+end);
 
 local function BuildingToolsContainer()
 
