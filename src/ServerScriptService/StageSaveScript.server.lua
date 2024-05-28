@@ -18,6 +18,7 @@ local function getCurrentStage(player)
 
   if not currentStage then
 
+    print("[Saving] Current stage not found. Creating a new one.");
     currentStage = Player.fromID(player.UserId, true):createStage();
 
   end;
@@ -49,6 +50,7 @@ end;
 ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(player)
 
   -- Verify that the player has permission to save the stage.
+  print(`[Saving] {player.Name} ({player.UserId}) requested to save the stage.`);
   assert(player, "You don't have permission to save this stage.");
   assert(not isSaving, "This stage is already saving. Wait until the process completes.");
   
@@ -61,6 +63,7 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
     
     -- Get the current stage info.
     local stage = getCurrentStage(player);
+    print(`[Saving] Stage ID: {stage.ID}`);
     local stageBuild: Model? = workspace:FindFirstChild("Stage");
     assert(stageBuild and stageBuild:IsA("Model"), "Couldn't find Stage the Workspace.");
 
@@ -140,15 +143,19 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
       ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
 
     end);
+
+    print("[Saving] Updating stage metadata...");
     stage:updateMetadata({
       timeUpdated = DateTime.now().UnixTimestampMillis;
     });
+
+    print("[Saving] Updating stage build data...");
     stage:updateBuildData(serializedPackage);
     task.wait();
     onBuildDataUpdateProgressChanged:Disconnect();
 
     -- 
-    print("Successfully saved the stage's build data.");
+    print("[Saving] Successfully saved the stage's build data.");
     ReplicatedStorage.Shared.Events.StageBuildDataSaveCompleted:FireAllClients(player);
     
   end);
@@ -239,7 +246,7 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
           setEnum(Enum.Material, property, value);
 
-        elseif ({Name = 1; CastShadow = 1; Anchored = 1})[property] then
+        elseif ({Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
 
           instance[property] = value;
 

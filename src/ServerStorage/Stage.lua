@@ -149,6 +149,7 @@ function Stage.__index:verifyID(): ()
     local canGetStage = pcall(function() Stage.fromID(possibleID) end);
     if not canGetStage then 
 
+      self.ID = possibleID;
       self:updateMetadata({ID = possibleID});
 
     end;
@@ -159,8 +160,6 @@ end
 
 -- Edits the stage's metadata.
 function Stage.__index:updateBuildData(newBuildData: {string}): ()
-  
-  self:verifyID();
   
   for index, chunk in ipairs(newBuildData) do
 
@@ -174,8 +173,6 @@ end
 
 -- Edits the stage's metadata.
 function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
-
-  self:verifyID();
 
   DataStore.StageMetadata:UpdateAsync(self.ID, function(encodedOldMetadata)
   
