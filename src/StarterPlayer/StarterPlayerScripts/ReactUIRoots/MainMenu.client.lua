@@ -27,6 +27,7 @@ local function MainMenuContainer()
       onStageDownloaded = function()
 
         handle.Enabled = false;
+        ReplicatedStorage.Shared.Functions.LoadCharacter:InvokeServer();
         TweenService:Create(Lighting.Blur, TweenInfo.new(), {Size = 0}):Play();
         StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true);
 

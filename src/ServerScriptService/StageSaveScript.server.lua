@@ -6,7 +6,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local ServerStorage = game:GetService("ServerStorage");
 local HttpService = game:GetService("HttpService");
-local Players = game:GetService("Players");
 
 local Player = require(ServerStorage.Player);
 local Stage = require(ServerStorage.Stage);
@@ -270,11 +269,5 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
   -- Reset the status so that we can download more stages.
   isDownloading = false;
   ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients(stageID);
-
-  for _, player in ipairs(Players:GetPlayers()) do
-
-    player:LoadCharacter();
-
-  end;
 
 end;
