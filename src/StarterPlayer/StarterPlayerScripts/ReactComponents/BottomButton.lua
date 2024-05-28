@@ -5,13 +5,14 @@ type BottomButtonProps = {
   description: string;
   onActivate: () -> ();
   keyName: string;
+  LayoutOrder: number;
 };
 
 local function BottomButton(props: BottomButtonProps)
 
   return React.createElement("TextButton", {
     BackgroundTransparency = 1;
-    LayoutOrder = 1;
+    LayoutOrder = props.LayoutOrder;
     Size = UDim2.new(0, 190, 0, 30);
     [React.Event.Activated] = function() props.onActivate() end;
   }, {

@@ -181,6 +181,7 @@ local function StagesScreen(props: StageScreenProps)
       DownloadStage = React.createElement(BottomButton, {
         description = "Download stage";
         keyName = "Enter";
+        LayoutOrder = 1;
         onActivate = function() 
         
           if not selectedStage then
@@ -196,6 +197,7 @@ local function StagesScreen(props: StageScreenProps)
       DeleteStage = React.createElement(BottomButton, {
         description = "Delete stage";
         keyName = "Del";
+        LayoutOrder = 2;
         onActivate = function() 
         
           if selectedStage then
