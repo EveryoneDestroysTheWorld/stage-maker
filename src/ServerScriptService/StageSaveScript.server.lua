@@ -80,7 +80,6 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
           type = "Part";
           properties = {
             Anchored = instance.Anchored;
-            BaseDurability = instance:GetAttribute("BaseDurability");
             CanCollide = instance.CanCollide;
             Color = instance.Color:ToHex();
             CastShadow = instance.CastShadow;
@@ -91,16 +90,24 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
               Z = instance.Size.Z;
             };
             Position = {
-              X = instance.Size.X;
-              Y = instance.Size.Y;
-              Z = instance.Size.Z;
+              X = instance.Position.X;
+              Y = instance.Position.Y;
+              Z = instance.Position.Z;
             };
             Orientation = {
-              X = instance.Size.X;
-              Y = instance.Size.Y;
-              Z = instance.Size.Z;
+              X = instance.Orientation.X;
+              Y = instance.Orientation.Y;
+              Z = instance.Orientation.Z;
             };
+            BackSurface = instance.BackSurface.Value;
+            BottomSurface = instance.BottomSurface.Value;
+            FrontSurface = instance.FrontSurface.Value;
+            LeftSurface = instance.LeftSurface.Value;
+            RightSurface = instance.RightSurface.Value;
+            TopSurface = instance.TopSurface.Value;
             Name = instance.Name;
+            Reflectance = instance.Reflectance;
+            Transparency = instance.Transparency;
             Shape = if instance:IsA("Part") then instance.Shape.Value else nil;
           };
           attributes = {
@@ -214,6 +221,7 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
     for _, instanceData in ipairs(page) do
 
       local instance = Instance.new(instanceData.type) :: any;
+      instance.Anchored = true;
       local function setEnum(enum, property, value)
 
         for _, enumItem in ipairs(enum:GetEnumItems()) do
@@ -230,6 +238,17 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
       for property, value in pairs(instanceData.properties) do
 
+        local enumProperties = {
+          Material = Enum.Material;
+          Shape = Enum.PartType;
+          BackSurface = Enum.SurfaceType;
+          BottomSurface = Enum.SurfaceType;
+          FrontSurface = Enum.SurfaceType;
+          LeftSurface = Enum.SurfaceType;
+          RightSurface = Enum.SurfaceType;
+          TopSurface = Enum.SurfaceType;
+        }
+
         if property == "Color" then
 
           instance[property] = Color3.fromHex(value);
@@ -238,15 +257,11 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
 
           instance[property] = Vector3.new(value.X, value.Y, value.Z);
 
-        elseif property == "Shape" then
+        elseif enumProperties[property] then
 
-          setEnum(Enum.PartType, property, value);
+          setEnum(enumProperties[property], property, value);
 
-        elseif property == "Material" then
-
-          setEnum(Enum.Material, property, value);
-
-        elseif ({Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
+        elseif ({Transparency = 1; Reflectance = 1; Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
 
           instance[property] = value;
 

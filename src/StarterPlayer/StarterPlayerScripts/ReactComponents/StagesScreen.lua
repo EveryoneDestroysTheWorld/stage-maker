@@ -19,25 +19,10 @@ local function StagesScreen(props: StageScreenProps)
     UIListLayout = React.createElement("UIListLayout", {
       SortOrder = Enum.SortOrder.LayoutOrder;
     });
-    Header = React.createElement("Frame", {
-      BackgroundTransparency = 1;
-      LayoutOrder = 1;
-      Size = UDim2.new(1, 0, 0, 50);
-    }, {
-      UIListLayout = React.createElement("UIListLayout", {
-        FillDirection = Enum.FillDirection.Horizontal;
-        VerticalAlignment = Enum.VerticalAlignment.Center;
-        SortOrder = Enum.SortOrder.LayoutOrder;
-      });
-      UIPadding = React.createElement("UIPadding", {
-        PaddingLeft = UDim.new(0, 15);
-        PaddingRight = UDim.new(0, 15);
-      });
-    });
     Content = React.createElement("Frame", {
       BackgroundTransparency = 1;
       LayoutOrder = 2;
-      Size = UDim2.new(1, 0, 1, -110);
+      Size = UDim2.new(1, 0, 1, -60);
     }, {
       UIListLayout = React.createElement("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder;

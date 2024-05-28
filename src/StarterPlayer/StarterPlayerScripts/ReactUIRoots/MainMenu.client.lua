@@ -13,6 +13,7 @@ local handle = Instance.new("ScreenGui");
 handle.Name = "MainMenu";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = player.PlayerGui;
+handle.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets;
 handle.DisplayOrder = 1;
 handle.Enabled = true;
 
