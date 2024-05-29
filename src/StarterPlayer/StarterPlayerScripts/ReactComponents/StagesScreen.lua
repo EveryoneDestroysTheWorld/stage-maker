@@ -134,14 +134,13 @@ local function StagesScreen(props: StageScreenProps)
         end;
         onStageConfirm = function(stage)
 
+          ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((stage or {}).ID);
+
           if not stage then
 
             props.onStageDownloaded();
-            return;
 
           end;
-
-          ReplicatedStorage.Shared.Functions.DownloadStage:InvokeServer(stage.ID);
 
         end;
         onDownloadComplete = props.onStageDownloaded;
@@ -169,13 +168,13 @@ local function StagesScreen(props: StageScreenProps)
         LayoutOrder = 1;
         onActivate = function() 
         
+          ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((selectedStage or {}).ID);
+          
           if not selectedStage then
 
             props.onStageDownloaded();
-            return;
 
           end;
-          ReplicatedStorage.Shared.Functions.DownloadStage:InvokeServer(selectedStage.ID);
 
         end;
       });

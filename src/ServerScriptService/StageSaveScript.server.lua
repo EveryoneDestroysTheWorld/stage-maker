@@ -186,14 +186,10 @@ ReplicatedStorage.Shared.Functions.DeleteStage.OnServerInvoke = function(player,
 end;
 
 local isDownloading = false;
-ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(player, stageID)
+ReplicatedStorage.Shared.Functions.SetStage.OnServerInvoke = function(player, stageID)
 
   assert(not isDownloading, "The server is currently downloading a stage. Please cancel the request or wait until the download completes before making a new request.");
-
-  -- Get the stage from the DataStore.
-  ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player, stageID);
-  currentStage = Stage.fromID(stageID);
-  local stageBuildData = currentStage:getBuildData();
+  isDownloading = true;
 
   -- Empty the stage.
   for _, instance in ipairs(workspace.Stage:GetChildren()) do
@@ -201,95 +197,105 @@ ReplicatedStorage.Shared.Functions.DownloadStage.OnServerInvoke = function(playe
     instance:Destroy();
 
   end;
+  
+  if stageID then
 
-  -- Calculate the total parts.
-  local totalParts = 0;
-  for _, page in ipairs(stageBuildData) do
+    -- Get the stage from the DataStore.
+    ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player, stageID);
+    currentStage = Stage.fromID(stageID);
+    local stageBuildData = currentStage:getBuildData();
 
-    for _, instance in ipairs(page) do
+    -- Calculate the total parts.
+    local totalParts = 0;
+    for _, page in ipairs(stageBuildData) do
 
-      totalParts += 1;
+      for _, instance in ipairs(page) do
 
-    end;
-
-  end;
-
-  -- Add the parts to the stage model.
-  local partsAudited = 0;
-  for _, page in ipairs(stageBuildData) do
-
-    for _, instanceData in ipairs(page) do
-
-      local instance = Instance.new(instanceData.type) :: any;
-      instance.Anchored = true;
-      local function setEnum(enum, property, value)
-
-        for _, enumItem in ipairs(enum:GetEnumItems()) do
-
-          if enumItem.Value == value then
-            
-            instance[property] = enumItem;
-
-          end;
-
-        end;  
+        totalParts += 1;
 
       end;
 
-      for property, value in pairs(instanceData.properties) do
+    end;
 
-        local enumProperties = {
-          Material = Enum.Material;
-          Shape = Enum.PartType;
-          BackSurface = Enum.SurfaceType;
-          BottomSurface = Enum.SurfaceType;
-          FrontSurface = Enum.SurfaceType;
-          LeftSurface = Enum.SurfaceType;
-          RightSurface = Enum.SurfaceType;
-          TopSurface = Enum.SurfaceType;
-        }
+    -- Add the parts to the stage model.
+    local partsAudited = 0;
+    for _, page in ipairs(stageBuildData) do
 
-        if property == "Color" then
+      for _, instanceData in ipairs(page) do
 
-          instance[property] = Color3.fromHex(value);
+        local instance = Instance.new(instanceData.type) :: any;
+        instance.Anchored = true;
+        local function setEnum(enum, property, value)
 
-        elseif ({Size = 1; Position = 1; Orientation = 1})[property] then
+          for _, enumItem in ipairs(enum:GetEnumItems()) do
 
-          instance[property] = Vector3.new(value.X, value.Y, value.Z);
+            if enumItem.Value == value then
+              
+              instance[property] = enumItem;
 
-        elseif enumProperties[property] then
+            end;
 
-          setEnum(enumProperties[property], property, value);
-
-        elseif ({Transparency = 1; Reflectance = 1; Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
-
-          instance[property] = value;
-
-        else
-
-          warn(`Unknown property: {property}`);
+          end;  
 
         end;
 
+        for property, value in pairs(instanceData.properties) do
+
+          local enumProperties = {
+            Material = Enum.Material;
+            Shape = Enum.PartType;
+            BackSurface = Enum.SurfaceType;
+            BottomSurface = Enum.SurfaceType;
+            FrontSurface = Enum.SurfaceType;
+            LeftSurface = Enum.SurfaceType;
+            RightSurface = Enum.SurfaceType;
+            TopSurface = Enum.SurfaceType;
+          }
+
+          if property == "Color" then
+
+            instance[property] = Color3.fromHex(value);
+
+          elseif ({Size = 1; Position = 1; Orientation = 1})[property] then
+
+            instance[property] = Vector3.new(value.X, value.Y, value.Z);
+
+          elseif enumProperties[property] then
+
+            setEnum(enumProperties[property], property, value);
+
+          elseif ({Transparency = 1; Reflectance = 1; Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
+
+            instance[property] = value;
+
+          else
+
+            warn(`Unknown property: {property}`);
+
+          end;
+
+        end;
+
+        for attribute, value in pairs(instanceData.attributes) do
+
+          instance:SetAttribute(attribute, value);
+
+        end;
+
+        instance.Parent = workspace.Stage;
+
+        partsAudited += 1;
+        ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
+
       end;
-
-      for attribute, value in pairs(instanceData.attributes) do
-
-        instance:SetAttribute(attribute, value);
-
-      end;
-
-      instance.Parent = workspace.Stage;
-
-      partsAudited += 1;
-      ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
 
     end;
 
+    
+    ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients(stageID);
   end;
 
   -- Reset the status so that we can download more stages.
   isDownloading = false;
-  ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients(stageID);
 
 end;
