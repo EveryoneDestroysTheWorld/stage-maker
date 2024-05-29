@@ -151,9 +151,10 @@ local function BuildingToolsContainer()
     local mouseButtonDownEvent = mouse.Button1Down:Connect(function()
     
       local target = mouse.Target;
+      local newSelectedParts = {};
       if target and target.Parent == workspace.Stage then
 
-        local newSelectedParts = {mouse.Target};
+        table.insert(newSelectedParts, target);
         if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
 
           newSelectedParts = selectedParts;
@@ -169,14 +170,10 @@ local function BuildingToolsContainer()
           end;
 
         end;
-        
-        ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire(newSelectedParts);
-
-      else
-
-        ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire({});
 
       end;
+
+      ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire(newSelectedParts);
 
     end);
 
