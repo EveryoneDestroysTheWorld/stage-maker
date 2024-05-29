@@ -164,7 +164,7 @@ local function StagesScreen(props: StageScreenProps)
         PaddingRight = UDim.new(0, 30);
       });
       DownloadStage = React.createElement(BottomButton, {
-        description = "Download stage";
+        description = `{if selectedStage then "Download" else "Create new"} stage`;
         keyName = "Enter";
         LayoutOrder = 1;
         onActivate = function() 
@@ -179,20 +179,26 @@ local function StagesScreen(props: StageScreenProps)
 
         end;
       });
-      DeleteStage = React.createElement(BottomButton, {
+      DeleteStage = if selectedStage then React.createElement(BottomButton, {
         description = "Delete stage";
         keyName = "Del";
         LayoutOrder = 2;
         onActivate = function() 
-        
-          if selectedStage then
 
-            ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(selectedStage.ID);
-
-          end;
+          ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(selectedStage.ID);
 
         end;
-      });
+      }) else nil;
+      PublishStage = if selectedStage then React.createElement(BottomButton, {
+        description = "Publish stage";
+        keyName = "Ins";
+        LayoutOrder = 3;
+        onActivate = function() 
+
+          -- ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(selectedStage.ID);
+
+        end;
+      }) else nil;
     });
   });
 
