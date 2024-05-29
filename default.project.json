@@ -32,6 +32,11 @@
     "StarterGui": {
       "$path": "src/StarterGui",
       "$ignoreUnknownInstances": true
+    },
+    "TextChatService": {
+      "Commands": {
+        "$path": "src/TextChatService/Commands"
+      }
     }
   }
 }
