@@ -15,6 +15,7 @@ handle.Name = "MainMenu";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = player.PlayerGui;
 handle.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets;
+handle.ResetOnSpawn = false;
 handle.DisplayOrder = 1;
 handle.Enabled = true;
 
@@ -37,7 +38,7 @@ local function MainMenuContainer()
         ReplicatedStorage.Shared.Functions.LoadCharacter:InvokeServer();
         TweenService:Create(Lighting.Blur, TweenInfo.new(), {Size = 0}):Play();
         StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true);
-        root:unmount();
+        handle.Enabled = false;
 
       end;
     });
@@ -50,7 +51,6 @@ TextChatService.Commands.StagesCommand.Triggered:Connect(function()
 
   handle.Enabled = true;
   StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false);
-  root:render(React.createElement(MainMenuContainer));
 
 end);
 

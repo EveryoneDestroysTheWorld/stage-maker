@@ -22,6 +22,7 @@ local handle = Instance.new("ScreenGui");
 handle.Name = "BuildingTools";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = player.PlayerGui;
+handle.ResetOnSpawn = false;
 handle.Enabled = false;
 
 local root = ReactRoblox.createRoot(handle);
