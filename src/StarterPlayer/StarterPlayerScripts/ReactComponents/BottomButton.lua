@@ -10,10 +10,22 @@ type BottomButtonProps = {
 
 local function BottomButton(props: BottomButtonProps)
 
+  local trueDescriptionSize, setTrueDescriptionSize = React.useState(130);
+  local descriptionLabelRef: {current: TextLabel?} = React.useRef(nil);
+  React.useEffect(function()
+
+    if descriptionLabelRef.current then
+
+      setTrueDescriptionSize(descriptionLabelRef.current.TextBounds.X);
+
+    end;
+
+  end, {props.description});
+
   return React.createElement("TextButton", {
     BackgroundTransparency = 1;
     LayoutOrder = props.LayoutOrder;
-    Size = UDim2.new(0, 190, 0, 30);
+    Size = UDim2.new(0, 60 + trueDescriptionSize, 0, 30);
     [React.Event.Activated] = function() props.onActivate() end;
   }, {
     UIListLayout = React.createElement("UIListLayout", {
@@ -45,6 +57,7 @@ local function BottomButton(props: BottomButtonProps)
       Size = UDim2.new(1, -60, 1, 0);
       FontFace = Font.fromId(11702779517);
       TextXAlignment = Enum.TextXAlignment.Left;
+      ref = descriptionLabelRef;
     });
   })
 
