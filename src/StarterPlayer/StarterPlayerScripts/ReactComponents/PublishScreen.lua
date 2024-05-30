@@ -5,7 +5,7 @@ local Screen = require(script.Parent.Screen);
 local TextInput = require(script.Parent.TextInput);
 local Button = require(script.Parent.Button);
 
-type StageScreenProps = {};
+type StageScreenProps = {onBack: () -> ()};
 
 local function PublishScreen(props: StageScreenProps)
 
@@ -16,7 +16,24 @@ local function PublishScreen(props: StageScreenProps)
   
     if isPublishing then
 
-      -- ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(selectedStage.ID);
+      print("Asking the server to publish the stage...");
+      
+      local isStagePublished, errorMessage = pcall(function()
+      
+        -- ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(selectedStage.ID);
+
+      end);
+
+      if isStagePublished then
+
+        print("The server successfully published the stage.");
+
+      else
+
+        warn(`Couldn't publish stage: {errorMessage}`);
+
+      end;
+      props.onBack();
 
     end;
 
@@ -28,10 +45,9 @@ local function PublishScreen(props: StageScreenProps)
         description = "Back";
         keyName = "←";
         LayoutOrder = 1;
-        onActivate = function() 
+        onActivate = if isPublishing then nil else function() 
 
           setIsPublishing(true);
-          -- 
 
         end;
       });
@@ -41,7 +57,7 @@ local function PublishScreen(props: StageScreenProps)
         LayoutOrder = 2;
         onActivate = if isPublishing then nil else function() 
         
-          
+          props.onBack();
 
         end;
       });

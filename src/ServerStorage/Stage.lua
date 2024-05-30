@@ -229,6 +229,21 @@ function Stage.__index:delete(): ()
   
 end
 
+-- Adds this stage's build data to the published stage index.
+function Stage.__index:publish(): ()
+
+  -- Lock editing on this stage.
+
+  -- Save the stage if this is the current stage.
+
+  -- Add this stage to the published stages list.
+
+  -- Mark this stage has published.
+
+  -- Unlock editing on this stage if a problem happened.
+
+end;
+
 function Stage.__index:getBuildData(): StageBuildData
 
   local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
