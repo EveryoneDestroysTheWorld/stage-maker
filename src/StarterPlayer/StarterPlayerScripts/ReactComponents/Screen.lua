@@ -39,7 +39,7 @@ local function Screen(props: StageScreenProps)
     }, {
       React.createElement("UIListLayout", {
         Name = "UIListLayout";
-        HorizontalAlignment = Enum.HorizontalAlignment.Left;
+        HorizontalAlignment = Enum.HorizontalAlignment.Right;
         Padding = UDim.new(0, 15);
         FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;

@@ -53,11 +53,6 @@ local function TextInput(props: TextInputProps)
         PaddingLeft = UDim.new(0, 15);
         PaddingRight = UDim.new(0, 15);
       });
-      UIStroke = React.createElement("UIStroke", {
-        ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
-        Color = Color3.new(1, 1, 1);
-        Transparency = 0.2;
-      });
       UICorner = React.createElement("UICorner", {
         CornerRadius = UDim.new(0, 5);
       });
