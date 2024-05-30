@@ -33,6 +33,7 @@ local function MainMenuContainer()
   
   return React.createElement(React.StrictMode, {}, {
     Screen = React.createElement(StagesScreen, {
+    -- Screen = React.createElement(require(ReactComponents.PublishScreen), {
       onStageDownloaded = function()
 
         ReplicatedStorage.Shared.Functions.LoadCharacter:InvokeServer();

@@ -14,18 +14,24 @@ local function Screen(props: StageScreenProps)
     UIListLayout = React.createElement("UIListLayout", {
       SortOrder = Enum.SortOrder.LayoutOrder;
     });
+    Header = React.createElement("Frame", {
+      BackgroundTransparency = 1;
+      LayoutOrder = 1;
+      Size = UDim2.new(1, 0, 0, 58);
+    }, {
+      UIPadding = React.createElement("UIPadding", {
+        PaddingTop = UDim.new(0, 10);
+      });
+      UIListLayout = React.createElement("UIListLayout", {
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        FillDirection = Enum.FillDirection.Horizontal;
+      });
+    });
     Content = React.createElement("Frame", {
       BackgroundTransparency = 1;
       LayoutOrder = 2;
-      Size = UDim2.new(1, 0, 1, -60);
-    }, {
-      React.createElement("UIListLayout", {
-        Name = "UIListLayout";
-        SortOrder = Enum.SortOrder.LayoutOrder;
-        HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween;
-      });
-      props.children;
-    });
+      Size = UDim2.new(1, 0, 1, -118);
+    }, {props.children});
     Options = React.createElement("Frame", {
       BackgroundTransparency = 1;
       LayoutOrder = 3;
