@@ -7,7 +7,9 @@ local DataStoreService = game:GetService("DataStoreService");
 local DataStore = {
   StageMetadata = DataStoreService:GetDataStore("StageMetadata");
   StageBuildData = DataStoreService:GetDataStore("StageBuildData");
-}
+  PublishedStages = DataStoreService:GetOrderedDataStore("PublishedStages");
+};
+local ServerScriptService = game:GetService("ServerScriptService");
 local HttpService = game:GetService("HttpService");
 
 type PermissionOverride = {
@@ -46,6 +48,9 @@ type StageMetadataObject = {
   
   -- The stage's description.
   description: string?;
+
+  -- The stage's description.
+  isPublished: boolean;
 
   -- The stage's members.
   members: {
@@ -94,13 +99,14 @@ export type StageBuildData = {{StageBuildDataItem}};
 
 local events = {};
 
-function Stage.new(properties: {[string]: any}?): Stage
+function Stage.new(properties: StageMetadataObject?): Stage
   
   local stage = {
     name = "Unnamed Stage";
     timeCreated = DateTime.now().UnixTimestampMillis;
     timeUpdated = DateTime.now().UnixTimestampMillis;
     members = {};
+    isPublished = false;
   };
 
   for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
@@ -119,6 +125,7 @@ function Stage.new(properties: {[string]: any}?): Stage
     stage.timeUpdated = if properties.timeUpdated then properties.timeUpdated else stage.timeUpdated;
     stage.permissionOverrides = if properties.permissionOverrides then properties.permissionOverrides else stage.permissionOverrides;
     stage.members = if properties.members then properties.members else stage.members;
+    stage.isPublished = if properties.isPublished then properties.isPublished else stage.isPublished;
 
   end;
 
@@ -232,15 +239,36 @@ end
 -- Adds this stage's build data to the published stage index.
 function Stage.__index:publish(): ()
 
+  -- Verify that this stage isn't already published.
+  assert(not self.isPublished, "This stage is already published.");
+
   -- Lock editing on this stage.
+  ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(false);
 
-  -- Save the stage if this is the current stage.
+  local isStagePublished, errorMessage = pcall(function()
 
-  -- Add this stage to the published stages list.
+    -- Save the stage if this is the current stage.
+    if ServerScriptService.StageSaveScript.GetCurrentStage:Invoke() == self then
 
-  -- Mark this stage has published.
+      ServerScriptService.StageSaveScript.SaveStage:Invoke();
+
+    end;
+
+    -- Add this stage to the published stages list.
+    DataStore.PublishedStages:SetAsync(self.ID, DateTime.now().UnixTimestampMillis);
+
+    -- Mark this stage has published.
+    self:updateMetadata({isPublished = true});
+
+  end);
 
   -- Unlock editing on this stage if a problem happened.
+  if not isStagePublished then
+
+    ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(true);
+    error(`Could not publish stage: {errorMessage}`);
+
+  end;
 
 end;
 
