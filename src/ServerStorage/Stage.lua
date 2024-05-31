@@ -24,8 +24,8 @@ type NewDataParameter = {
 };
 
 type StageMemberObject = {
-  id: number;
-  role: number;
+  ID: number;
+  role: "Admin";
 };
 
 type StageMetadataObject = {
@@ -53,12 +53,7 @@ type StageMetadataObject = {
   isPublished: boolean;
 
   -- The stage's members.
-  members: {
-    {
-      ID: string;
-      role: "admin";
-    }
-  };
+  members: {StageMemberObject};
   
 }
 
@@ -99,15 +94,9 @@ export type StageBuildData = {{StageBuildDataItem}};
 
 local events = {};
 
-function Stage.new(properties: StageMetadataObject?): Stage
+function Stage.new(properties: StageMetadataObject): Stage
   
-  local stage = {
-    name = "Unnamed Stage";
-    timeCreated = DateTime.now().UnixTimestampMillis;
-    timeUpdated = DateTime.now().UnixTimestampMillis;
-    members = {};
-    isPublished = false;
-  };
+  local stage = properties;
 
   for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
 
@@ -115,19 +104,6 @@ function Stage.new(properties: StageMetadataObject?): Stage
     stage[eventName] = events[eventName].Event;
 
   end
-
-  if properties then
-
-    stage.ID = if properties.ID then properties.ID else stage.ID;
-    stage.name = if properties.name then properties.name else stage.name;
-    stage.description = if properties.description then properties.description else stage.description;
-    stage.timeCreated = if properties.timeCreated then properties.timeCreated else stage.timeCreated;
-    stage.timeUpdated = if properties.timeUpdated then properties.timeUpdated else stage.timeUpdated;
-    stage.permissionOverrides = if properties.permissionOverrides then properties.permissionOverrides else stage.permissionOverrides;
-    stage.members = if properties.members then properties.members else stage.members;
-    stage.isPublished = if properties.isPublished then properties.isPublished else stage.isPublished;
-
-  end;
 
   setmetatable(stage, {__index = Stage.__index});
   

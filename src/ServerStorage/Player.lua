@@ -72,13 +72,20 @@ end;
 -- Creates a stage on behalf of the player.
 function Player.__index:createStage(): Stage.Stage
 
+  local timeCreated = DateTime.now().UnixTimestampMillis;
   local stage = Stage.new({
+    name = "Unnamed Stage";
+    timeUpdated = timeCreated;
+    timeCreated = timeCreated;
+    description = "";
+    isPublished = false;
+    permissionOverrides = {};
     members = {
       {
-        id = self.ID;
-        role = "admin";
+        ID = self.ID;
+        role = "Admin";
       }
-    }
+    };
   });
 
   stage:verifyID();
