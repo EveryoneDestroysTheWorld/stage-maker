@@ -39,7 +39,7 @@ local function StagesScreen(props: StageScreenProps)
         end;
       }) else nil;
       PublishStage = if props.currentStage then React.createElement(BottomButton, {
-        description = "Publish stage";
+        description = `{if props.currentStage and props.currentStage.isPublished then "Unp" else "P"}ublish stage`;
         keyName = "Ins";
         LayoutOrder = 3;
         onActivate = function() 
