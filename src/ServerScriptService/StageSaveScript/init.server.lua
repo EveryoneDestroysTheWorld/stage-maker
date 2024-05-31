@@ -28,6 +28,12 @@ local function getCurrentStage(player)
 
 end;
 
+script.GetCurrentStage.OnInvoke = function()
+
+  return currentStage;
+
+end;
+
 ReplicatedStorage.Shared.Functions.GetStages.OnServerInvoke = function(player)
 
   local stages = {};
@@ -307,7 +313,7 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
   assert(typeof(stageID) == "string", "Stage ID must be a string.");
 
   -- Lock editing on this stage.
-  local isPublishingCurrentStage = currentStage.ID == stageID;
+  local isPublishingCurrentStage = if currentStage then currentStage.ID == stageID else false;
   if isPublishingCurrentStage then
 
     ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(false);
@@ -318,13 +324,18 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
   local stage = if isPublishingCurrentStage then currentStage else Stage.fromID(stageID); 
   local isStagePublished, errorMessage = pcall(function()
   
+    print(`Publishing Stage {stageID}...`);
     stage:publish();
 
   end);
 
-  -- Unlock editing on this stage if a problem happened.
-  if not isStagePublished then
+  if isStagePublished then
 
+    print(`Stage {stageID} has been successfully published.`);
+
+  else
+
+    -- Unlock editing on this stage if a problem happened.
     if isPublishingCurrentStage then
 
       ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(true);

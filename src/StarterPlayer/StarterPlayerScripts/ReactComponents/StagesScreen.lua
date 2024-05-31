@@ -6,23 +6,21 @@ local StageSelector = require(script.Parent.StageSelector);
 local BottomButton = require(script.Parent.BottomButton);
 local Screen = require(script.Parent.Screen);
 
-type StageScreenProps = {onStageDownloaded: () -> ()};
+type StageScreenProps = {onStageDownloaded: () -> (); navigate: (screenName: string) -> (); currentStage: any; setCurrentStage: (stage: any) -> ();};
 
 local function StagesScreen(props: StageScreenProps)
-  
-  local selectedStage, setSelectedStage = React.useState(nil);
   
   return React.createElement(Screen, {
     options = {
       DownloadStage = React.createElement(BottomButton, {
-        description = `{if selectedStage then "Download" else "Create new"} stage`;
+        description = `{if props.currentStage then "Download" else "Create new"} stage`;
         keyName = "Enter";
         LayoutOrder = 1;
         onActivate = function() 
         
-          ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((selectedStage or {}).ID);
+          ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((props.currentStage or {}).ID);
           
-          if not selectedStage then
+          if not props.currentStage then
 
             props.onStageDownloaded();
 
@@ -30,23 +28,23 @@ local function StagesScreen(props: StageScreenProps)
 
         end;
       });
-      DeleteStage = if selectedStage then React.createElement(BottomButton, {
+      DeleteStage = if props.currentStage then React.createElement(BottomButton, {
         description = "Delete stage";
         keyName = "Del";
         LayoutOrder = 2;
         onActivate = function() 
 
-          ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(selectedStage.ID);
+          ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(props.currentStage.ID);
 
         end;
       }) else nil;
-      PublishStage = if selectedStage then React.createElement(BottomButton, {
+      PublishStage = if props.currentStage then React.createElement(BottomButton, {
         description = "Publish stage";
         keyName = "Ins";
         LayoutOrder = 3;
         onActivate = function() 
 
-          -- ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(selectedStage.ID);
+          props.navigate("PublishScreen");
 
         end;
       }) else nil;
@@ -93,12 +91,12 @@ local function StagesScreen(props: StageScreenProps)
             Padding = UDim.new(0, 15);
           });
           Making = React.createElement(StatusBubble, {
-            status = if selectedStage then "Complete" else "Default";
+            status = if props.currentStage then "Complete" else "Default";
             iconImage = icons.build;
             LayoutOrder = 1;
           });
           Saved = React.createElement(StatusBubble, {
-            status = if selectedStage then "Complete" else "Default";
+            status = if props.currentStage then "Complete" else "Default";
             iconImage = icons.save;
             LayoutOrder = 2;
           });
@@ -148,7 +146,7 @@ local function StagesScreen(props: StageScreenProps)
           FontFace = Font.fromId(11702779517, Enum.FontWeight.Bold);
           TextTruncate = Enum.TextTruncate.AtEnd;
           TextXAlignment = Enum.TextXAlignment.Right;
-          Text = if selectedStage then selectedStage.name else "A BRAND NEW STAGE";
+          Text = if props.currentStage then props.currentStage.name else "A BRAND NEW STAGE";
           TextSize = 40;
           TextColor3 = Color3.new(1, 1, 1);
         });
@@ -157,7 +155,7 @@ local function StagesScreen(props: StageScreenProps)
     StageSelector = React.createElement(StageSelector, {
       onStageSelect = function(stage)
 
-        setSelectedStage(stage);
+        props.setCurrentStage(stage);
 
       end;
       onStageConfirm = function(stage)

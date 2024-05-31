@@ -3,6 +3,7 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local ReactComponents = script.Parent.Parent.ReactComponents;
 local StagesScreen = require(ReactComponents.StagesScreen);
+local PublishScreen = require(ReactComponents.PublishScreen);
 local TweenService = game:GetService("TweenService");
 local Lighting = game:GetService("Lighting");
 local StarterGui = game:GetService("StarterGui");
@@ -30,10 +31,23 @@ local function MainMenuContainer()
     TweenService:Create(Lighting.Blur, TweenInfo.new(), {Size = 8}):Play();
 
   end, {});
-  
+
+  local currentStage, setCurrentStage = React.useState(nil);
+  local screens = {
+    PublishScreen = function() return PublishScreen; end;
+    StagesScreen = function() return StagesScreen; end;
+  }
+  local screen, setScreen = React.useState(screens.StagesScreen);
+
   return React.createElement(React.StrictMode, {}, {
-    -- Screen = React.createElement(StagesScreen, {
-    Screen = React.createElement(require(ReactComponents.PublishScreen), {
+    Screen = React.createElement(screen, {
+      navigate = function(screenName: string)
+
+        setScreen(screens[screenName]);
+
+      end;
+      currentStage = currentStage;
+      setCurrentStage = setCurrentStage;
       onStageDownloaded = function()
 
         ReplicatedStorage.Shared.Functions.LoadCharacter:InvokeServer();

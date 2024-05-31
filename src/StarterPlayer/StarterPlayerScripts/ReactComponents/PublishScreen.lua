@@ -5,12 +5,22 @@ local Screen = require(script.Parent.Screen);
 local TextInput = require(script.Parent.TextInput);
 local Button = require(script.Parent.Button);
 
-type StageScreenProps = {onBack: () -> ()};
+type StageScreenProps = {currentStage: any; navigate: (screenName: string) -> ()};
 
 local function PublishScreen(props: StageScreenProps)
 
   local stageName: string, setStageName = React.useState("");
   local isPublishing, setIsPublishing = React.useState(false);
+
+  React.useEffect(function()
+  
+    if props.currentStage then
+
+      setStageName(props.currentStage.name);
+
+    end;
+
+  end, {props.currentStage});
 
   React.useEffect(function()
   
@@ -20,7 +30,7 @@ local function PublishScreen(props: StageScreenProps)
       
       local isStagePublished, errorMessage = pcall(function()
       
-        ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer();
+        ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(props.currentStage.ID);
 
       end);
 
@@ -33,11 +43,11 @@ local function PublishScreen(props: StageScreenProps)
         warn(`Couldn't publish stage: {errorMessage}`);
 
       end;
-      props.onBack();
+      props.navigate("StagesScreen");
 
     end;
 
-  end, {isPublishing});
+  end, {props.currentStage, isPublishing});
 
   return React.createElement(Screen, {
     options = {
@@ -57,7 +67,7 @@ local function PublishScreen(props: StageScreenProps)
         LayoutOrder = 2;
         onActivate = if isPublishing then nil else function() 
         
-          props.onBack();
+          props.navigate("StagesScreen");
 
         end;
       });
