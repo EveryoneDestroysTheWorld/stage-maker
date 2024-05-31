@@ -101,7 +101,7 @@ local function StagesScreen(props: StageScreenProps)
             LayoutOrder = 2;
           });
           Published = React.createElement(StatusBubble, {
-            status = "Default";
+            status = if props.currentStage and props.currentStage.isPublished then "Complete" else "Default";
             iconImage = icons.check;
             LayoutOrder = 3;
           });
