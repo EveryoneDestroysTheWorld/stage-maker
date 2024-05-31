@@ -20,7 +20,7 @@ local function PublishScreen(props: StageScreenProps)
       
       local isStagePublished, errorMessage = pcall(function()
       
-        -- ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(selectedStage.ID);
+        ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer();
 
       end);
 

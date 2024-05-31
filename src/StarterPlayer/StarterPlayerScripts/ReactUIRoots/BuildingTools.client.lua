@@ -206,6 +206,12 @@ local function BuildingToolsContainer()
       });});
   });
   
-end
+end;
+
+ReplicatedStorage.Shared.Events.BuildingToolsToggled.OnClientEvent:Connect(function(areBuildingToolsEnabled: boolean)
+
+  handle.Enabled = areBuildingToolsEnabled;
+
+end);
 
 root:render(React.createElement(BuildingToolsContainer));

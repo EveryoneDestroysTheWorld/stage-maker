@@ -6,6 +6,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local ServerStorage = game:GetService("ServerStorage");
 local HttpService = game:GetService("HttpService");
+local ServerScriptService = game:GetService("ServerScriptService");
 
 local Player = require(ServerStorage.Player);
 local Stage = require(ServerStorage.Stage);
@@ -297,5 +298,40 @@ ReplicatedStorage.Shared.Functions.SetStage.OnServerInvoke = function(player, st
 
   -- Reset the status so that we can download more stages.
   isDownloading = false;
+
+end;
+
+ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player: Player, stageID: string)
+
+  -- Verify that the stage ID is a string.
+  assert(typeof(stageID) == "string", "Stage ID must be a string.");
+
+  -- Lock editing on this stage.
+  local isPublishingCurrentStage = currentStage.ID == stageID;
+  if isPublishingCurrentStage then
+
+    ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(false);
+
+  end;
+
+  -- Find and publish the stage.
+  local stage = if isPublishingCurrentStage then currentStage else Stage.fromID(stageID); 
+  local isStagePublished, errorMessage = pcall(function()
+  
+    stage:publish();
+
+  end);
+
+  -- Unlock editing on this stage if a problem happened.
+  if not isStagePublished then
+
+    if isPublishingCurrentStage then
+
+      ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(true);
+
+    end;
+    error(`Could not publish stage: {errorMessage}`);
+
+  end;
 
 end;

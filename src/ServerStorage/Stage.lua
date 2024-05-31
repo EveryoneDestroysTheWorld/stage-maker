@@ -242,33 +242,18 @@ function Stage.__index:publish(): ()
   -- Verify that this stage isn't already published.
   assert(not self.isPublished, "This stage is already published.");
 
-  -- Lock editing on this stage.
-  ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(false);
+  -- Save the stage if this is the current stage.
+  if ServerScriptService.StageSaveScript.GetCurrentStage:Invoke() == self then
 
-  local isStagePublished, errorMessage = pcall(function()
-
-    -- Save the stage if this is the current stage.
-    if ServerScriptService.StageSaveScript.GetCurrentStage:Invoke() == self then
-
-      ServerScriptService.StageSaveScript.SaveStage:Invoke();
-
-    end;
-
-    -- Add this stage to the published stages list.
-    DataStore.PublishedStages:SetAsync(self.ID, DateTime.now().UnixTimestampMillis);
-
-    -- Mark this stage has published.
-    self:updateMetadata({isPublished = true});
-
-  end);
-
-  -- Unlock editing on this stage if a problem happened.
-  if not isStagePublished then
-
-    ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(true);
-    error(`Could not publish stage: {errorMessage}`);
+    ServerScriptService.StageSaveScript.SaveStage:Invoke();
 
   end;
+
+  -- Add this stage to the published stages list.
+  DataStore.PublishedStages:SetAsync(self.ID, DateTime.now().UnixTimestampMillis);
+
+  -- Mark this stage has published.
+  self:updateMetadata({isPublished = true});
 
 end;
 
