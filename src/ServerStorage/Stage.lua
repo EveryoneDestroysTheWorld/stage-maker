@@ -30,7 +30,6 @@ type StageMemberObject = {
 
 type StageMetadataObject = {
   
-  -- [Properties]
   -- The stage's unique ID.
   ID: string?;
   
@@ -72,7 +71,7 @@ type StageEvents = {
   onBuildDataUpdate: RBXScriptSignal;
   
   -- Fires when the build data is partially updated. 
-  onBuildDataUpdateProgressChanged: RBXScriptSignal;
+  onBuildDataUpdateProgressChanged: RBXScriptSignal<number, number>;
   
   -- Fires when the stage is deleted.
   onDelete: RBXScriptSignal;
