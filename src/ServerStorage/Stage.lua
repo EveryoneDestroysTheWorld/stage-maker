@@ -17,18 +17,12 @@ type PermissionOverride = {
   ["stage.save"]: boolean?;
 };
 
-type NewDataParameter = {
-  permissionOverrides: {PermissionOverride}?;
-  name: string?;
-  description: string?;
-};
-
 type StageMemberObject = {
   ID: number;
   role: "Admin";
 };
 
-type StageMetadataObject = {
+type StageProperties = {
   
   -- The stage's unique ID.
   ID: string?;
@@ -56,11 +50,25 @@ type StageMetadataObject = {
   
 }
 
+type UpdatableStageProperties = {
+  ID: string?;
+  permissionOverrides: {PermissionOverride}?;
+  name: string?;
+  timeCreated: number?;
+  timeUpdated: number?;
+  description: string?;
+  isPublished: boolean?;
+  members: {StageMemberObject}?;
+}
+
 type StageMethods = {
-  updateBuildData: (self: StageMetadataObject, newData: NewDataParameter) -> ();
-  updateMetadata: (self: StageMetadataObject, newData: NewDataParameter) -> ();
-  delete: (self: StageMetadataObject) -> ();
-  verifyID: (self: StageMetadataObject) -> ();
+  updateBuildData: (self: Stage, newData: {string}) -> ();
+  updateMetadata: (self: Stage, newData: UpdatableStageProperties) -> ();
+  delete: (self: Stage) -> ();
+  publish: (self: Stage) -> ();
+  verifyID: (self: Stage) -> ();
+  getBuildData: (self: Stage) -> StageBuildData;
+  toString: (self: Stage) -> string;
 }
 
 type StageEvents = {
@@ -78,10 +86,10 @@ type StageEvents = {
 }
 
 local Stage = {
-  __index = {};
+  __index = {} :: StageMethods;
 };
 
-export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageMetadataObject & StageMethods & StageEvents;
+export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageProperties & StageMethods & StageEvents;
 
 export type StageBuildDataItem = {
   type: string; 
@@ -93,7 +101,7 @@ export type StageBuildData = {{StageBuildDataItem}};
 
 local events = {};
 
-function Stage.new(properties: StageMetadataObject): Stage
+function Stage.new(properties: StageProperties): Stage
   
   local stage = properties;
 
@@ -132,7 +140,6 @@ function Stage.__index:verifyID(): ()
     if not canGetStage then 
 
       self.ID = possibleID;
-      self:updateMetadata({ID = possibleID});
 
     end;
     
@@ -143,6 +150,8 @@ end
 -- Edits the stage's metadata.
 function Stage.__index:updateBuildData(newBuildData: {string}): ()
   
+  self:verifyID();
+
   for index, chunk in ipairs(newBuildData) do
 
     DataStore.StageBuildData:SetAsync(`{self.ID}/{index}`, chunk);
@@ -154,7 +163,9 @@ function Stage.__index:updateBuildData(newBuildData: {string}): ()
 end
 
 -- Edits the stage's metadata.
-function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
+function Stage.__index:updateMetadata(newData: UpdatableStageProperties): ()
+
+  self:verifyID();
 
   DataStore.StageMetadata:UpdateAsync(self.ID, function(encodedOldMetadata)
   
@@ -171,7 +182,7 @@ function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
 
   for key, value in pairs(newData) do
 
-    self[key] = value;
+    (self :: {})[key] = value;
 
   end;
   
@@ -203,8 +214,8 @@ function Stage.__index:delete(): ()
   until keyList.IsFinished;
   
   -- Delete metadata.
-  DataStoreService:GetDataStore("StageMetadata"):RemoveAsync(self.ID);
-  
+  DataStore.StageMetadata:RemoveAsync(self.ID);
+
   -- Tell the player.
   print(`Stage {self.ID} has been successfully deleted.`);
   events.onDelete:Fire();
@@ -263,7 +274,7 @@ function Stage.__index:toString(): string
   local encodedData = {};
   for _, property in ipairs(properties) do
 
-    encodedData[property] = self[property];
+    encodedData[property] = (self :: {})[property];
 
   end;
 
