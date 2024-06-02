@@ -85,6 +85,7 @@ local function StagesScreen(props: StageScreenProps)
 
     return function()
 
+      onStageAdd:Disconnect();
       onStageDelete:Disconnect();
       stageUpdateEvent:Disconnect();
 
