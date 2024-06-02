@@ -3,10 +3,10 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local player = game:GetService("Players").LocalPlayer;
 local ReactComponents = script.Parent.Parent.ReactComponents;
-local StageDeletionConfirmationPopup = require(ReactComponents.StageDeletionConfirmationPopup);
+local StageUnpublishConfirmationPopup = require(ReactComponents.StageUnpublishConfirmationPopup);
 
 local handle = Instance.new("ScreenGui");
-handle.Name = "StageDeletionPopup";
+handle.Name = "StageUnpublishConfirmationPopup";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets;
 handle.ResetOnSpawn = false;
@@ -21,7 +21,7 @@ local function StageDeletionConfirmationPopupContainer()
 
   React.useEffect(function()
   
-    ReplicatedStorage.Client.Functions.MarkStageForDeletion.OnInvoke = function(stage)
+    ReplicatedStorage.Client.Functions.MarkStageForUnpublishing.OnInvoke = function(stage)
 
       setStage(stage);
 
@@ -36,7 +36,7 @@ local function StageDeletionConfirmationPopupContainer()
   end, {stage});
 
   return if stage then React.createElement(React.StrictMode, {}, {
-    Popup = React.createElement(StageDeletionConfirmationPopup, {
+    Popup = React.createElement(StageUnpublishConfirmationPopup, {
       stage = stage;
       onClose = function()
 

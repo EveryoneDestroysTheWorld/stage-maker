@@ -326,14 +326,12 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
   
     print(`Publishing Stage {stageID}...`);
     stage:publish();
+    print(`Stage {stageID} has been successfully published.`);
+    ReplicatedStorage.Shared.Events.StageUpdated:FireAllClients(stageID, stage);
 
   end);
 
-  if isStagePublished then
-
-    print(`Stage {stageID} has been successfully published.`);
-
-  else
+  if not isStagePublished then
 
     -- Unlock editing on this stage if a problem happened.
     if isPublishingCurrentStage then
@@ -342,6 +340,38 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
 
     end;
     error(`Could not publish stage: {errorMessage}`);
+
+  end;
+
+end;
+
+ReplicatedStorage.Shared.Functions.UnpublishStage.OnServerInvoke = function(player: Player, stageID: string)
+
+  -- Verify that the stage ID is a string.
+  assert(typeof(stageID) == "string", "Stage ID must be a string.");
+
+  -- Find and publish the stage.
+  local isUnpublishingCurrentStage = if currentStage then currentStage.ID == stageID else false;
+  local stage = if isUnpublishingCurrentStage then currentStage else Stage.fromID(stageID); 
+  local isStageUnpublished, errorMessage = pcall(function()
+  
+    print(`Publishing Stage {stageID}...`);
+    stage:unpublish();
+    print(`Stage {stageID} has been successfully unpublished.`);
+    ReplicatedStorage.Shared.Events.StageUpdated:FireAllClients(stageID, stage);
+
+  end);
+
+  if not isStageUnpublished then
+
+    error(`Could not unpublish stage: {errorMessage}`);
+
+  end;
+
+  -- Unlock editing on this stage.
+  if isUnpublishingCurrentStage then
+
+    ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(true);
 
   end;
 

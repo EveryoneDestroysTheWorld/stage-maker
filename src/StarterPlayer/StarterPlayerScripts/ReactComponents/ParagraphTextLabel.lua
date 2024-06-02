@@ -6,6 +6,7 @@ type ParagraphTextLabelProps = {
   text: string;
   headingLevel: number?;
   LayoutOrder: number?;
+  TextColor3: Color3?;
   children: any;
 };
 
@@ -29,7 +30,7 @@ local function ParagraphTextLabel(props: ParagraphTextLabelProps)
     LayoutOrder = props.LayoutOrder or 0;
     Text = props.text;
     BackgroundTransparency = 1;
-    TextColor3 = Colors.ParagraphText;
+    TextColor3 = props.TextColor3 or Colors.ParagraphText;
     AutomaticSize = Enum.AutomaticSize.XY;
     TextSize = fontInfo.TextSize;
     Size = UDim2.new(0, 0, 0, 0);

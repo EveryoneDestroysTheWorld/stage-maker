@@ -66,6 +66,7 @@ type StageMethods = {
   updateMetadata: (self: Stage, newData: UpdatableStageProperties) -> ();
   delete: (self: Stage) -> ();
   publish: (self: Stage) -> ();
+  unpublish: (self: Stage) -> ();
   verifyID: (self: Stage) -> ();
   getBuildData: (self: Stage) -> StageBuildData;
   toString: (self: Stage) -> string;
@@ -240,6 +241,19 @@ function Stage.__index:publish(): ()
 
   -- Mark this stage has published.
   self:updateMetadata({isPublished = true});
+
+end;
+
+function Stage.__index:unpublish(): ()
+
+  -- Verify that this stage is published.
+  assert(self.isPublished, "This stage is already unpublished.");
+
+  -- Remove this stage from the published stages list.
+  DataStore.PublishedStages:RemoveAsync(self.ID);
+
+  -- Mark this stage has unpublished.
+  self:updateMetadata({isPublished = false});
 
 end;
 
