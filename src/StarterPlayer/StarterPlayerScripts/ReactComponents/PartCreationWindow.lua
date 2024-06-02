@@ -5,6 +5,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
+local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local Window = require(script.Parent.Window);
 local Dropdown = require(script.Parent.Dropdown);
 
@@ -12,81 +13,93 @@ type PartCreationWindowProps = {onClose: () -> ()};
 
 local function PartCreationWindow(props: PartCreationWindowProps)
   
-  local previewPart = React.useState(Instance.new("Part"));
-
-  local selectedOptionIndex, setSelectedOptionIndex = React.useState(table.find(Enum.PartType:GetEnumItems(), previewPart.Shape));
+  local previewPartRef = React.useRef(nil);
+  local previewPartShape, setPreviewPartShape = React.useState(Enum.PartType.Block);
+  local previewPartPosition, setPreviewPartPosition = React.useState(nil);
+  local previewPart, setPreviewPart = React.useState(nil);
   React.useEffect(function()
 
     local mouse = game:GetService("Players").LocalPlayer:GetMouse();
-    mouse.TargetFilter = previewPart;
-    previewPart.CanCollide = false;
-    previewPart.Transparency = 0.4;
-    previewPart.CanQuery = false;
-    previewPart.Anchored = true;
-    local shapeChangeEvent = previewPart:GetPropertyChangedSignal("Shape"):Connect(function()
-      
-      setSelectedOptionIndex(table.find(Enum.PartType:GetEnumItems(), previewPart.Shape));
-      
-    end)
+    mouse.TargetFilter = previewPartRef.current;
     
     local heartbeatEvent = game:GetService("RunService").Heartbeat:Connect(function()
 
-      if mouse.Target then 
+      setPreviewPartPosition(function(previewPartPosition)
 
-        -- Find the direction
-        previewPart.Position = mouse.Hit.Position + Vector3.new(
-          (if mouse.TargetSurface == Enum.NormalId.Right then previewPart.Size.X elseif mouse.TargetSurface == Enum.NormalId.Left then -previewPart.Size.X else 0) / 2,
-          (if mouse.TargetSurface == Enum.NormalId.Top then previewPart.Size.Y elseif mouse.TargetSurface == Enum.NormalId.Bottom then -previewPart.Size.Y else 0) / 2,
-          (if mouse.TargetSurface == Enum.NormalId.Back then previewPart.Size.Z elseif mouse.TargetSurface == Enum.NormalId.Front then -previewPart.Size.Z else 0) / 2
-        );
-        previewPart.Parent = workspace;
+        local previewPart = previewPartRef.current;
+        if previewPart and mouse.Target then 
 
-      else
+          -- Find the direction
+          return mouse.Hit.Position + Vector3.new(
+            (if mouse.TargetSurface == Enum.NormalId.Right then previewPart.Size.X elseif mouse.TargetSurface == Enum.NormalId.Left then -previewPart.Size.X else 0) / 2,
+            (if mouse.TargetSurface == Enum.NormalId.Top then previewPart.Size.Y elseif mouse.TargetSurface == Enum.NormalId.Bottom then -previewPart.Size.Y else 0) / 2,
+            (if mouse.TargetSurface == Enum.NormalId.Back then previewPart.Size.Z elseif mouse.TargetSurface == Enum.NormalId.Front then -previewPart.Size.Z else 0) / 2
+          );
 
-        previewPart.Parent = nil;
+        end;
 
-      end
+        return;
+
+      end);
 
     end);
     
     -- Create a part when the player presses the down button.
     local mouseButton1DownEvent = mouse.Button1Down:Connect(function()
 
-      local originalPartData = {
-        CFrame = previewPart.CFrame;
-        Shape = previewPart.Shape;
-      };
-      local partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
-      local selectedPartsChanged = ReplicatedStorage.Shared.Events.SelectedPartsChanged;
-      selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
-      ReplicatedStorage.Client.Functions.AddToHistoryStore:Invoke({
-        description = "Created <b>Part</b>";
-        undo = function()
+      local previewPart = previewPartRef.current;
+      if previewPart then
 
-          ReplicatedStorage.Shared.Functions.DestroyPart:InvokeServer(partID);
-          selectedPartsChanged:Fire({});
+        local originalPartData = {
+          CFrame = previewPart.CFrame;
+          Shape = previewPart.Shape;
+        };
+        local partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
+        local selectedPartsChanged = ReplicatedStorage.Shared.Events.SelectedPartsChanged;
+        selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
+        ReplicatedStorage.Client.Functions.AddToHistoryStore:Invoke({
+          description = "Created <b>Part</b>";
+          undo = function()
 
-        end,
-        redo = function()
+            ReplicatedStorage.Shared.Functions.DestroyPart:InvokeServer(partID);
+            selectedPartsChanged:Fire({});
 
-          partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
-          selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
+          end,
+          redo = function()
 
-        end
-      })
+            partID = ReplicatedStorage.Shared.Functions.CreatePart:InvokeServer(originalPartData);
+            selectedPartsChanged:Fire({workspace.Stage:FindFirstChild(partID)});
+
+          end
+        })
+
+      end;
 
     end);
 
     return function()
 
-      previewPart:Destroy();
-      shapeChangeEvent:Disconnect();
       heartbeatEvent:Disconnect();
       mouseButton1DownEvent:Disconnect();
 
     end;
     
   end, {});
+
+  React.useEffect(function()
+  
+    setPreviewPart(React.createElement("Part", {
+      Name = "PreviewPart";
+      CanCollide = false;
+      Transparency = 0.4;
+      CanQuery = false;
+      Anchored = true;
+      Position = previewPartPosition or Vector3.zero;
+      Shape = previewPartShape;
+      ref = previewPartRef;
+    }));
+
+  end, {previewPartPosition, previewPartShape :: any});
 
   local dropdownOptions = {};
   for index, partType in ipairs(Enum.PartType:GetEnumItems()) do
@@ -95,7 +108,7 @@ local function PartCreationWindow(props: PartCreationWindowProps)
       text = partType.Name;
       onClick = function()
 
-        previewPart.Shape = partType;
+        setPreviewPartShape(partType);
 
       end;
     });
@@ -105,9 +118,12 @@ local function PartCreationWindow(props: PartCreationWindowProps)
   return React.createElement(Window, {
     name = "Create part"; 
     size = UDim2.new(0, 250, 0, 165); 
-    onCloseButtonClick = props.onClose;
+    onCloseButtonClick = function() props.onClose() end;
   }, {
-    React.createElement(Dropdown, {selectedIndex = selectedOptionIndex; options = dropdownOptions}) 
+    React.createElement(Dropdown, {selectedIndex = table.find(Enum.PartType:GetEnumItems(), previewPartShape); options = dropdownOptions});
+    if previewPartPosition then 
+      ReactRoblox.createPortal({previewPart}, workspace) 
+    else previewPart;
   });
 
 end

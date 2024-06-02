@@ -1,0 +1,6 @@
+{
+  "ClassName": "TextChatCommand",
+  "AutocompleteVisible": true,
+  "Enabled": true,
+  "PrimaryAlias": "/speed"
+}

@@ -4,55 +4,17 @@ local React = require(ReplicatedStorage.Shared.Packages.react);
 local StageButton = require(script.Parent.StageButton);
 local TweenService = game:GetService("TweenService");
 
-type StageSelectorProps = {onStageSelect: (stage: any) -> (); onStageConfirm: (stage: any) -> (); onDownloadComplete: () -> ()};
+type StageSelectorProps = {
+  onStageSelect: (stage: any) -> (); 
+  onStageConfirm: (stage: any) -> (); 
+  onDownloadComplete: () -> ();
+  stages: any;
+};
 
 local function StageSelector(props: StageSelectorProps)
 
-  local stages, setStages = React.useState({});
   local selectedStageIndex, setSelectedStageIndex = React.useState(1);
   local stageComponents, setStageComponents = React.useState({});
-
-  React.useEffect(function()
-
-    local stages = ReplicatedStorage.Shared.Functions.GetStages:InvokeServer();
-    
-    local function updateSelectedStageIndex(actionName, inputState)
-
-      if inputState == Enum.UserInputState.Begin then
-
-        setSelectedStageIndex(function(selectedStageIndex) 
-
-          if actionName == "MoveSelectorLeft" and selectedStageIndex - 1 >= 1 then 
-            
-            return selectedStageIndex - 1;
-          
-          elseif actionName == "MoveSelectorRight" and selectedStageIndex + 1 <= #stages + 1 then 
-            
-            return selectedStageIndex + 1;
-
-          end;
-
-          return selectedStageIndex;
-
-        end);
-
-      end;
-
-    end;
-
-    ContextActionService:BindAction("MoveSelectorLeft", updateSelectedStageIndex, false, Enum.KeyCode.Left);
-    ContextActionService:BindAction("MoveSelectorRight", updateSelectedStageIndex, false, Enum.KeyCode.Right);
-
-    setStages(stages);
-
-    return function()
-
-      ContextActionService:UnbindAction("MoveSelectorLeft");
-      ContextActionService:UnbindAction("MoveSelectorRight");
-
-    end;
-
-  end, {});
 
   React.useEffect(function()
   
@@ -60,41 +22,42 @@ local function StageSelector(props: StageSelectorProps)
 
       if inputState == Enum.UserInputState.Begin then
 
-        props.onStageConfirm(stages[selectedStageIndex]);
+        props.onStageConfirm(props.stages[selectedStageIndex]);
 
       end;
 
     end;
 
-    local onStageDelete = ReplicatedStorage.Shared.Events.StageDeleted.OnClientEvent:Connect(function(stageID)
-    
-      for stageIndex, stage in ipairs(stages) do
+    local function updateSelectedStageIndex(actionName, inputState)
 
-        if stage.ID == stageID then
+      if inputState == Enum.UserInputState.Begin then
 
-          -- Remove the stage from the list.
-          table.remove(stages, stageIndex);
-          setStages(stages);
-
-          -- Fix the index.
-          if stageIndex + 1 <= selectedStageIndex then
-
-            setSelectedStageIndex(selectedStageIndex - 1);
-  
-          end;
-
-          break;
+        if actionName == "MoveSelectorLeft" and selectedStageIndex - 1 >= 1 then 
+          
+          setSelectedStageIndex(selectedStageIndex - 1);
+        
+        elseif actionName == "MoveSelectorRight" and selectedStageIndex + 1 <= #props.stages + 1 then 
+          
+          setSelectedStageIndex(selectedStageIndex + 1);
 
         end;
 
       end;
 
-    end);
-    
+    end;
+
+    if #props.stages + 1 < selectedStageIndex then
+
+      setSelectedStageIndex(#props.stages + 1);
+
+    end;
+
+    ContextActionService:BindAction("MoveSelectorLeft", updateSelectedStageIndex, false, Enum.KeyCode.Left);
+    ContextActionService:BindAction("MoveSelectorRight", updateSelectedStageIndex, false, Enum.KeyCode.Right);
     ContextActionService:BindActionAtPriority("LoadStage", loadStage, false, 2, Enum.KeyCode.Return, Enum.KeyCode.KeypadEnter);
 
     local stageComponents = {};
-    for index, stage in ipairs(stages) do
+    for index, stage in ipairs(props.stages) do
 
       table.insert(stageComponents, React.createElement(StageButton, {
         stage = stage;
@@ -120,18 +83,19 @@ local function StageSelector(props: StageSelectorProps)
 
     return function()
 
-      onStageDelete:Disconnect();
+      ContextActionService:UnbindAction("MoveSelectorLeft");
+      ContextActionService:UnbindAction("MoveSelectorRight");
       ContextActionService:UnbindAction("LoadStage");
 
     end;
 
-  end, {stages, selectedStageIndex});
+  end, {props.stages, selectedStageIndex});
 
   local scrollingFrameRef = React.createRef();
   React.useEffect(function()
   
     TweenService:Create(scrollingFrameRef.current, TweenInfo.new(0.25, Enum.EasingStyle.Sine), {CanvasPosition = Vector2.new(if selectedStageIndex > 1 then (selectedStageIndex - 1) * 300 + (15 * (selectedStageIndex - 1)) else 0, 0)}):Play();
-    props.onStageSelect(stages[selectedStageIndex - 1]);
+    props.onStageSelect(props.stages[selectedStageIndex - 1]);
 
   end, {selectedStageIndex});
   
@@ -139,7 +103,7 @@ local function StageSelector(props: StageSelectorProps)
     BackgroundTransparency = 1;
     LayoutOrder = 2;
     Size = UDim2.new(1, 0, 0, 150);
-    CanvasSize = UDim2.new(1, if #stages > 0 then #stages * 300 + (15 * #stages) else 0, 0, 0);
+    CanvasSize = UDim2.new(1, if #props.stages > 0 then #props.stages * 300 + (15 * #props.stages) else 0, 0, 0);
     ScrollingDirection = Enum.ScrollingDirection.X;
     ScrollBarThickness = 0;
     ref = scrollingFrameRef;

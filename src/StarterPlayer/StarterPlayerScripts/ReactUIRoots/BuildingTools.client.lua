@@ -22,6 +22,7 @@ local handle = Instance.new("ScreenGui");
 handle.Name = "BuildingTools";
 handle.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 handle.Parent = player.PlayerGui;
+handle.ResetOnSpawn = false;
 handle.Enabled = false;
 
 local root = ReactRoblox.createRoot(handle);
@@ -36,8 +37,8 @@ end);
 
 local function BuildingToolsContainer()
 
-  local selectedParts, setSelectedParts = React.useState({});
-  local highlights, setHighlights = React.useState({});
+  local selectedParts: {Part | TrussPart}, setSelectedParts = React.useState({});
+  local highlights: {Highlight}, setHighlights = React.useState({});
   React.useEffect(function()
 
     ReplicatedStorage.Shared.Events.SelectedPartsChanged.Event:Connect(function(selectedParts)
@@ -60,23 +61,7 @@ local function BuildingToolsContainer()
     
   end, {});
 
-  local selectedWindow, setSelectedWindow = React.useState(React.createElement(React.Fragment));
-  local globalProps = {
-    parts = selectedParts; 
-    onClose = function() setSelectedWindow(React.createElement(React.Fragment)) end;
-    updateParts = function(newProperties) 
-    
-      local partIds = {};
-      for _, part in ipairs(selectedParts) do
-    
-        table.insert(partIds, part.Name);
-    
-      end;
-
-      ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, newProperties);
-
-    end;
-  };
+  local selectedWindow, setSelectedWindow = React.useState(React.Fragment);
   
   local sections = {
     {
@@ -84,7 +69,7 @@ local function BuildingToolsContainer()
       buttons = {{
         name = "CreateButton";
         iconImage = "rbxassetid://17546996412";
-        onClick = function() setSelectedWindow(React.createElement(PartCreationWindow, globalProps)); end;
+        window = PartCreationWindow;
       }}
     }, {
       name = "ModificationTools";
@@ -93,39 +78,39 @@ local function BuildingToolsContainer()
         {
           name = "MoveButton";
           iconImage = "rbxassetid://17547020218";
-          onClick = function() setSelectedWindow(React.createElement(PartPositionModificationWindow, globalProps)); end;
+          window = PartPositionModificationWindow;
         }, {
           name = "ResizeButton";
           iconImage = "rbxassetid://17547037235";
-          onClick = function() setSelectedWindow(React.createElement(PartSizeModificationWindow, globalProps)); end;
+          window = PartSizeModificationWindow;
         }, {
           name = "OrientationButton";
           iconImage = "rbxassetid://17547019914";
-          onClick = function() setSelectedWindow(React.createElement(PartOrientationModificationWindow, globalProps)); end;
+          window = PartOrientationModificationWindow;
         }, {
           name = "ColorButton";
           iconImage = "rbxassetid://17550945994";
-          onClick = function() setSelectedWindow(React.createElement(PartColorModificationWindow, globalProps)); end;
+          window = PartColorModificationWindow;
         }, {
           name = "MaterialButton";
           iconImage = "rbxassetid://17551063892";
-          onClick = function() setSelectedWindow(React.createElement(PartMaterialModificationWindow, globalProps)); end;
+          window = PartMaterialModificationWindow;
         }, {
           name = "AnchorButton";
           iconImage = "rbxassetid://17550968289";
-          onClick = function() setSelectedWindow(React.createElement(PartAnchorModificationWindow, globalProps)); end;
+          window = PartAnchorModificationWindow;
         }, {
           name = "CollisionButton";
           iconImage = "rbxassetid://17551046771";
-          onClick = function() setSelectedWindow(React.createElement(PartCollisionModificationWindow, globalProps)); end;
+          window = PartCollisionModificationWindow;
         }, {
           name = "SurfaceButton";
           iconImage = "rbxassetid://17550959976";
-          onClick = function() setSelectedWindow(React.createElement(PartSurfaceModificationWindow, globalProps)); end;
+          window = PartSurfaceModificationWindow;
         }, {
           name = "DurabilityButton";
           iconImage = "rbxassetid://17551033481";
-          onClick = function() setSelectedWindow(React.createElement(PartDurabilityModificationWindow, globalProps)); end;
+          window = PartDurabilityModificationWindow;
         }
       }
     }
@@ -150,9 +135,10 @@ local function BuildingToolsContainer()
     local mouseButtonDownEvent = mouse.Button1Down:Connect(function()
     
       local target = mouse.Target;
+      local newSelectedParts = {};
       if target and target.Parent == workspace.Stage then
 
-        local newSelectedParts = {mouse.Target};
+        table.insert(newSelectedParts, target);
         if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
 
           newSelectedParts = selectedParts;
@@ -168,14 +154,10 @@ local function BuildingToolsContainer()
           end;
 
         end;
-        
-        ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire(newSelectedParts);
-
-      else
-
-        ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire({});
 
       end;
+
+      ReplicatedStorage.Shared.Events.SelectedPartsChanged:Fire(newSelectedParts);
 
     end);
 
@@ -186,10 +168,32 @@ local function BuildingToolsContainer()
     end;
 
   end, {selectedParts});
-  
+
   return React.createElement(React.StrictMode, {}, {
-    React.createElement(BuildingToolsSelector, {sections = sections});
-    selectedWindow;
+    React.createElement(BuildingToolsSelector, {
+      sections = sections;
+      onWindowChange = function(window)
+
+        setSelectedWindow(function() return window end);
+
+      end;
+    });
+    React.createElement(selectedWindow, {
+      parts = selectedParts; 
+      onClose = function() setSelectedWindow(React.Fragment) end;
+      updateParts = function(newProperties) 
+      
+        local partIds = {};
+        for _, part in ipairs(selectedParts) do
+      
+          table.insert(partIds, part.Name);
+      
+        end;
+  
+        ReplicatedStorage.Shared.Functions.UpdateParts:InvokeServer(partIds, newProperties);
+  
+      end;
+    });
     React.createElement("Folder", {
       Name = "Selections";
     }, {
@@ -202,6 +206,12 @@ local function BuildingToolsContainer()
       });});
   });
   
-end
+end;
+
+ReplicatedStorage.Shared.Events.BuildingToolsToggled.OnClientEvent:Connect(function(areBuildingToolsEnabled: boolean)
+
+  handle.Enabled = areBuildingToolsEnabled;
+
+end);
 
 root:render(React.createElement(BuildingToolsContainer));

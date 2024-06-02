@@ -10,10 +10,13 @@ type BottomButtonProps = {
 
 local function BottomButton(props: BottomButtonProps)
 
+  local descriptionLabelRef: {current: TextLabel?} = React.useRef(nil);
+
   return React.createElement("TextButton", {
     BackgroundTransparency = 1;
     LayoutOrder = props.LayoutOrder;
-    Size = UDim2.new(0, 190, 0, 30);
+    AutomaticSize = Enum.AutomaticSize.X;
+    Size = UDim2.new(0, 0, 0, 30);
     [React.Event.Activated] = function() props.onActivate() end;
   }, {
     UIListLayout = React.createElement("UIListLayout", {
@@ -27,11 +30,16 @@ local function BottomButton(props: BottomButtonProps)
       BackgroundTransparency = 0.65;
       Text = props.keyName:upper();
       TextColor3 = Color3.new(1, 1, 1);
+      AutomaticSize = Enum.AutomaticSize.X;
       TextSize = 10;
-      Size = UDim2.new(0, 50, 0, 25);
+      Size = UDim2.new(0, 0, 0, 25);
       FontFace = Font.fromId(11702779517, Enum.FontWeight.Bold);
       TextXAlignment = Enum.TextXAlignment.Center;
     }, {
+      UIPadding = React.createElement("UIPadding", {
+        PaddingLeft = UDim.new(0, 10);
+        PaddingRight = UDim.new(0, 10);
+      });
       UICorner = React.createElement("UICorner", {
         CornerRadius = UDim.new(0, 5);
       });
@@ -41,10 +49,12 @@ local function BottomButton(props: BottomButtonProps)
       BackgroundTransparency = 1;
       Text = props.description:upper();
       TextColor3 = Color3.new(1, 1, 1);
+      AutomaticSize = Enum.AutomaticSize.X;
       TextSize = 14;
-      Size = UDim2.new(1, -60, 1, 0);
+      Size = UDim2.new(0, 0, 1, 0);
       FontFace = Font.fromId(11702779517);
       TextXAlignment = Enum.TextXAlignment.Left;
+      ref = descriptionLabelRef;
     });
   })
 

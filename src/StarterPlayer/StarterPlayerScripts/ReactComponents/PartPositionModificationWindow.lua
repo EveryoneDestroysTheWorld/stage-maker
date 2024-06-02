@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local Window = require(script.Parent.Window);
 
-type PartPositionModificationWindowProps = {onClose: () -> (); parts: {BasePart}; updateParts: (newProperties: any) -> ();};
+type PartPositionModificationWindowProps = {onClose: () -> (); parts: {Part | TrussPart}; updateParts: (newProperties: any) -> ();};
 
 local function PartPositionModificationWindow(props: PartPositionModificationWindowProps)
   

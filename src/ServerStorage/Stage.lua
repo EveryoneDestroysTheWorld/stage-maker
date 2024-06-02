@@ -7,7 +7,9 @@ local DataStoreService = game:GetService("DataStoreService");
 local DataStore = {
   StageMetadata = DataStoreService:GetDataStore("StageMetadata");
   StageBuildData = DataStoreService:GetDataStore("StageBuildData");
-}
+  PublishedStages = DataStoreService:GetOrderedDataStore("PublishedStages");
+};
+local ServerScriptService = game:GetService("ServerScriptService");
 local HttpService = game:GetService("HttpService");
 
 type PermissionOverride = {
@@ -15,20 +17,13 @@ type PermissionOverride = {
   ["stage.save"]: boolean?;
 };
 
-type NewDataParameter = {
-  permissionOverrides: {PermissionOverride}?;
-  name: string?;
-  description: string?;
-};
-
 type StageMemberObject = {
-  id: number;
-  role: number;
+  ID: number;
+  role: "Admin";
 };
 
-type StageMetadataObject = {
+type StageProperties = {
   
-  -- [Properties]
   -- The stage's unique ID.
   ID: string?;
   
@@ -47,21 +42,34 @@ type StageMetadataObject = {
   -- The stage's description.
   description: string?;
 
+  -- The stage's description.
+  isPublished: boolean;
+
   -- The stage's members.
-  members: {
-    {
-      ID: string;
-      role: "admin";
-    }
-  };
+  members: {StageMemberObject};
   
 }
 
+type UpdatableStageProperties = {
+  ID: string?;
+  permissionOverrides: {PermissionOverride}?;
+  name: string?;
+  timeCreated: number?;
+  timeUpdated: number?;
+  description: string?;
+  isPublished: boolean?;
+  members: {StageMemberObject}?;
+}
+
 type StageMethods = {
-  updateBuildData: (self: StageMetadataObject, newData: NewDataParameter) -> ();
-  updateMetadata: (self: StageMetadataObject, newData: NewDataParameter) -> ();
-  delete: (self: StageMetadataObject) -> ();
-  verifyID: (self: StageMetadataObject) -> ();
+  updateBuildData: (self: Stage, newData: {string}) -> ();
+  updateMetadata: (self: Stage, newData: UpdatableStageProperties) -> ();
+  delete: (self: Stage) -> ();
+  publish: (self: Stage) -> ();
+  unpublish: (self: Stage) -> ();
+  verifyID: (self: Stage) -> ();
+  getBuildData: (self: Stage) -> StageBuildData;
+  toString: (self: Stage) -> string;
 }
 
 type StageEvents = {
@@ -72,17 +80,17 @@ type StageEvents = {
   onBuildDataUpdate: RBXScriptSignal;
   
   -- Fires when the build data is partially updated. 
-  onBuildDataUpdateProgressChanged: RBXScriptSignal;
+  onBuildDataUpdateProgressChanged: RBXScriptSignal<number, number>;
   
   -- Fires when the stage is deleted.
   onDelete: RBXScriptSignal;
 }
 
 local Stage = {
-  __index = {};
+  __index = {} :: StageMethods;
 };
 
-export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageMetadataObject & StageMethods & StageEvents;
+export type Stage = typeof(setmetatable({}, {__index = Stage.__index})) & StageProperties & StageMethods & StageEvents;
 
 export type StageBuildDataItem = {
   type: string; 
@@ -94,14 +102,9 @@ export type StageBuildData = {{StageBuildDataItem}};
 
 local events = {};
 
-function Stage.new(properties: {[string]: any}?): Stage
+function Stage.new(properties: StageProperties): Stage
   
-  local stage = {
-    name = "Unnamed Stage";
-    timeCreated = DateTime.now().UnixTimestampMillis;
-    timeUpdated = DateTime.now().UnixTimestampMillis;
-    members = {};
-  };
+  local stage = properties;
 
   for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
 
@@ -109,18 +112,6 @@ function Stage.new(properties: {[string]: any}?): Stage
     stage[eventName] = events[eventName].Event;
 
   end
-
-  if properties then
-
-    stage.ID = if properties.ID then properties.ID else stage.ID;
-    stage.name = if properties.name then properties.name else stage.name;
-    stage.description = if properties.description then properties.description else stage.description;
-    stage.timeCreated = if properties.timeCreated then properties.timeCreated else stage.timeCreated;
-    stage.timeUpdated = if properties.timeUpdated then properties.timeUpdated else stage.timeUpdated;
-    stage.permissionOverrides = if properties.permissionOverrides then properties.permissionOverrides else stage.permissionOverrides;
-    stage.members = if properties.members then properties.members else stage.members;
-
-  end;
 
   setmetatable(stage, {__index = Stage.__index});
   
@@ -150,7 +141,6 @@ function Stage.__index:verifyID(): ()
     if not canGetStage then 
 
       self.ID = possibleID;
-      self:updateMetadata({ID = possibleID});
 
     end;
     
@@ -161,6 +151,8 @@ end
 -- Edits the stage's metadata.
 function Stage.__index:updateBuildData(newBuildData: {string}): ()
   
+  self:verifyID();
+
   for index, chunk in ipairs(newBuildData) do
 
     DataStore.StageBuildData:SetAsync(`{self.ID}/{index}`, chunk);
@@ -172,7 +164,9 @@ function Stage.__index:updateBuildData(newBuildData: {string}): ()
 end
 
 -- Edits the stage's metadata.
-function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
+function Stage.__index:updateMetadata(newData: UpdatableStageProperties): ()
+
+  self:verifyID();
 
   DataStore.StageMetadata:UpdateAsync(self.ID, function(encodedOldMetadata)
   
@@ -189,7 +183,7 @@ function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
 
   for key, value in pairs(newData) do
 
-    self[key] = value;
+    (self :: {})[key] = value;
 
   end;
   
@@ -198,17 +192,26 @@ function Stage.__index:updateMetadata(newData: StageMetadataObject): ()
 end
 
 -- Irrecoverably deletes the stage, including its build data.
+-- This also unpublishes the stage if it is published.
+-- This method does not remove the stage from members' inventories because it may take a longer time.
+-- Instead, the stage will be automatically deleted from the members' inventories as the Stage Maker cannot find them. (See Player.__index:getStages())
 function Stage.__index:delete(): ()
   
+  -- Remove the stage from the published stages list if possible.
+  if self.isPublished then
+
+    self:unpublish();
+
+  end;
+
   -- Delete build data.
-  local stageBuildDataDataStore = DataStoreService:GetDataStore("StageBuildData");
   local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
   repeat
 
     local keys = keyList:GetCurrentPage();
     for _, key in ipairs(keys) do
 
-      stageBuildDataDataStore:RemoveAsync(key.KeyName);
+      DataStore.StageBuildData:RemoveAsync(key.KeyName);
   
     end;
 
@@ -221,13 +224,51 @@ function Stage.__index:delete(): ()
   until keyList.IsFinished;
   
   -- Delete metadata.
-  DataStoreService:GetDataStore("StageMetadata"):RemoveAsync(self.ID);
-  
+  DataStore.StageMetadata:RemoveAsync(self.ID);
+
   -- Tell the player.
   print(`Stage {self.ID} has been successfully deleted.`);
   events.onDelete:Fire();
   
 end
+
+-- Adds this stage's build data to the published stage index.
+function Stage.__index:publish(): ()
+
+  -- Verify that this stage isn't already published.
+  assert(not self.isPublished, "This stage is already published.");
+
+  -- Save the stage if this is the current stage.
+  if ServerScriptService.StageSaveScript.GetCurrentStage:Invoke() == self then
+
+    ServerScriptService.StageSaveScript.SaveStage:Invoke();
+
+  end;
+
+  -- Add this stage to the published stages list.
+  DataStore.PublishedStages:SetAsync(self.ID, DateTime.now().UnixTimestampMillis);
+
+  -- Mark this stage has published.
+  self:updateMetadata({isPublished = true});
+
+  print(`Successfully published Stage {self.ID}.`);
+
+end;
+
+function Stage.__index:unpublish(): ()
+
+  -- Verify that this stage is published.
+  assert(self.isPublished, "This stage is already unpublished.");
+
+  -- Remove this stage from the published stages list.
+  DataStore.PublishedStages:RemoveAsync(self.ID);
+
+  -- Mark this stage has unpublished.
+  self:updateMetadata({isPublished = false});
+
+  print(`Successfully unpublished Stage {self.ID}.`);
+
+end;
 
 function Stage.__index:getBuildData(): StageBuildData
 
@@ -251,6 +292,20 @@ function Stage.__index:getBuildData(): StageBuildData
   until keyList.IsFinished;
 
   return buildDataEncoded;
+
+end;
+
+function Stage.__index:toString(): string
+
+  local properties = {"ID", "permissionOverrides", "name", "timeCreated", "timeUpdated", "description", "isPublished", "members"}
+  local encodedData = {};
+  for _, property in ipairs(properties) do
+
+    encodedData[property] = (self :: {})[property];
+
+  end;
+
+  return HttpService:JSONEncode(encodedData);
 
 end;
 

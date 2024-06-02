@@ -8,9 +8,10 @@ type BuildingToolsSelectorProps = {
     buttons: {{
       name: string;
       iconImage: string;
-      onClick: () -> ();
+      window: any;
     }}
   }};
+  onWindowChange: (window: any) -> ();
 }
 
 local function BuildingToolsSelector(props: BuildingToolsSelectorProps)
@@ -28,7 +29,7 @@ local function BuildingToolsSelector(props: BuildingToolsSelectorProps)
         Size = UDim2.new(0, 30, 0, 30);
         Image = sectionItem.iconImage;
         LayoutOrder = itemIndex;
-        [React.Event.Activated] = if sectionItems.disabled then nil else sectionItem.onClick;
+        [React.Event.Activated] = if sectionItems.disabled then nil else function() props.onWindowChange(sectionItem.window) end;
       }));
       
     end
