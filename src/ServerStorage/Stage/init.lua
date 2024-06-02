@@ -80,7 +80,7 @@ type StageEvents = {
   onBuildDataUpdate: RBXScriptSignal;
   
   -- Fires when the build data is partially updated. 
-  onBuildDataUpdateProgressChanged: RBXScriptSignal<number, number>;
+  onBuildDataUpdateProgressChanged: RBXScriptSignal;
   
   -- Fires when the stage is deleted.
   onDelete: RBXScriptSignal;
@@ -102,6 +102,7 @@ export type StageBuildData = {{StageBuildDataItem}};
 
 local events = {};
 
+-- Returns a new Stage object.
 function Stage.new(properties: StageProperties): Stage
   
   local stage = properties;
@@ -119,6 +120,7 @@ function Stage.new(properties: StageProperties): Stage
   
 end
 
+-- Returns a new Stage object based on an ID.
 function Stage.fromID(id: string): Stage
   
   local encodedStageData = DataStoreService:GetDataStore("StageMetadata"):GetAsync(id);
@@ -131,6 +133,7 @@ function Stage.fromID(id: string): Stage
   
 end
 
+-- Verifies that this stage has an ID. If it doesn't, then it finds and adds one.
 function Stage.__index:verifyID(): ()
   
   while not self.ID do
@@ -148,7 +151,7 @@ function Stage.__index:verifyID(): ()
   
 end
 
--- Edits the stage's metadata.
+-- Edits the stage's build data.
 function Stage.__index:updateBuildData(newBuildData: {string}): ()
   
   self:verifyID();
@@ -255,6 +258,7 @@ function Stage.__index:publish(): ()
 
 end;
 
+-- Removes this stage from the published stage index.
 function Stage.__index:unpublish(): ()
 
   -- Verify that this stage is published.
@@ -270,6 +274,7 @@ function Stage.__index:unpublish(): ()
 
 end;
 
+-- Returns this stage's build data.
 function Stage.__index:getBuildData(): StageBuildData
 
   local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
