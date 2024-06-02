@@ -59,7 +59,7 @@ local function PublishScreen(props: StageScreenProps)
         LayoutOrder = 1;
         onActivate = if isPublishing then nil else function() 
 
-          setIsPublishing(true);
+          props.navigate("StagesScreen");
 
         end;
       });
@@ -69,7 +69,7 @@ local function PublishScreen(props: StageScreenProps)
         LayoutOrder = 2;
         onActivate = if isPublishing then nil else function() 
         
-          props.navigate("StagesScreen");
+          setIsPublishing(true);
 
         end;
       });
