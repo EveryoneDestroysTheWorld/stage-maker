@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
+local ScreenUIPadding = require(script.Parent.ScreenUIPadding);
+local ScreenUIListLayout = require(script.Parent.ScreenUIListLayout);
 local BottomButton = require(script.Parent.BottomButton);
 local Screen = require(script.Parent.Screen);
 local TextInput = require(script.Parent.TextInput);
@@ -73,16 +75,8 @@ local function PublishScreen(props: StageScreenProps)
       });
     };
   }, {
-    UIListLayout = React.createElement("UIListLayout", {
-      Padding = UDim.new(0, 15);
-      SortOrder = Enum.SortOrder.LayoutOrder;
-    });
-    UIPadding = React.createElement("UIPadding", {
-      PaddingLeft = UDim.new(0, 30);
-      PaddingRight = UDim.new(0, 30);
-      PaddingTop = UDim.new(0, 30);
-      PaddingBottom = UDim.new(0, 30);
-    });
+    UIListLayout = React.createElement(ScreenUIListLayout);
+    UIPadding = React.createElement(ScreenUIPadding);
     Heading = React.createElement("TextLabel", {
       AutomaticSize = Enum.AutomaticSize.XY;
       Text = "PUBLISH STAGE";

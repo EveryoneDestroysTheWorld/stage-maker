@@ -9,7 +9,7 @@ local Screen = require(script.Parent.Screen);
 type StageScreenProps = {onStageDownloaded: () -> (); navigate: (screenName: string) -> (); currentStage: any; setCurrentStage: (stage: any) -> ();};
 
 local function StagesScreen(props: StageScreenProps)
-  
+
   return React.createElement(Screen, {
     options = {
       DownloadStage = React.createElement(BottomButton, {
@@ -34,7 +34,7 @@ local function StagesScreen(props: StageScreenProps)
         LayoutOrder = 2;
         onActivate = function() 
 
-          ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(props.currentStage.ID);
+          ReplicatedStorage.Client.Functions.MarkStageForDeletion:Invoke(props.currentStage);
 
         end;
       }) else nil;
