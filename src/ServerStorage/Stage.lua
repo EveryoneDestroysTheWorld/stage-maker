@@ -192,17 +192,26 @@ function Stage.__index:updateMetadata(newData: UpdatableStageProperties): ()
 end
 
 -- Irrecoverably deletes the stage, including its build data.
+-- This also unpublishes the stage if it is published.
+-- This method does not remove the stage from members' inventories because it may take a longer time.
+-- Instead, the stage will be automatically deleted from the members' inventories as the Stage Maker cannot find them. (See Player.__index:getStages())
 function Stage.__index:delete(): ()
   
+  -- Remove the stage from the published stages list if possible.
+  if self.isPublished then
+
+    self:unpublish();
+
+  end;
+
   -- Delete build data.
-  local stageBuildDataDataStore = DataStoreService:GetDataStore("StageBuildData");
   local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
   repeat
 
     local keys = keyList:GetCurrentPage();
     for _, key in ipairs(keys) do
 
-      stageBuildDataDataStore:RemoveAsync(key.KeyName);
+      DataStore.StageBuildData:RemoveAsync(key.KeyName);
   
     end;
 
@@ -242,6 +251,8 @@ function Stage.__index:publish(): ()
   -- Mark this stage has published.
   self:updateMetadata({isPublished = true});
 
+  print(`Successfully published Stage {self.ID}.`);
+
 end;
 
 function Stage.__index:unpublish(): ()
@@ -254,6 +265,8 @@ function Stage.__index:unpublish(): ()
 
   -- Mark this stage has unpublished.
   self:updateMetadata({isPublished = false});
+
+  print(`Successfully unpublished Stage {self.ID}.`);
 
 end;
 

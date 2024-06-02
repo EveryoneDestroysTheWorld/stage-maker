@@ -326,7 +326,6 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
   
     print(`Publishing Stage {stageID}...`);
     stage:publish();
-    print(`Stage {stageID} has been successfully published.`);
     ReplicatedStorage.Shared.Events.StageUpdated:FireAllClients(stageID, stage);
 
   end);
@@ -357,7 +356,6 @@ ReplicatedStorage.Shared.Functions.UnpublishStage.OnServerInvoke = function(play
   
     print(`Publishing Stage {stageID}...`);
     stage:unpublish();
-    print(`Stage {stageID} has been successfully unpublished.`);
     ReplicatedStorage.Shared.Events.StageUpdated:FireAllClients(stageID, stage);
 
   end);

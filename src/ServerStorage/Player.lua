@@ -111,6 +111,7 @@ function Player.__index:createStage(): Stage.Stage
 
 end;
 
+-- Returns a list of the player's stages. Removes stage IDs that cannot be found.
 function Player.__index:getStages(): {Stage.Stage}
 
   local stages = {};
