@@ -4,10 +4,12 @@
 -- This module is a class that represents a player.
 
 local DataStoreService = game:GetService("DataStoreService");
+local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local DataStore = {
   PlayerMetadata = DataStoreService:GetDataStore("PlayerMetadata");
   Inventory = DataStoreService:GetDataStore("Inventory");
 }
+local Players = game:GetService("Players");
 local HttpService = game:GetService("HttpService");
 local Stage = require(script.Parent.Stage);
 
@@ -106,6 +108,14 @@ function Player.__index:createStage(): Stage.Stage
     return HttpService:JSONEncode(stageIDs);
 
   end);
+
+  -- Notify the player if they're here.
+  local player = Players:GetPlayerByUserId(self.ID);
+  if player then
+
+    ReplicatedStorage.Shared.Events.StageAdded:FireClient(player, stage);
+
+  end;
   
   return stage;
 

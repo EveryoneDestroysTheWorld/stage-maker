@@ -33,6 +33,14 @@ local function StagesScreen(props: StageScreenProps)
 
     end;
 
+    local onStageAdd = ReplicatedStorage.Shared.Events.StageAdded.OnClientEvent:Connect(function(stage)
+    
+      createNewStageList();
+      table.insert(stages, stage);
+      setStages(stages);
+
+    end);
+
     local onStageDelete = ReplicatedStorage.Shared.Events.StageDeleted.OnClientEvent:Connect(function(stageID)
     
       for stageIndex, stage in ipairs(stages) do

@@ -176,7 +176,6 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
   
   isSaving = false;
   
-  
   if message then
     
     error(message);
