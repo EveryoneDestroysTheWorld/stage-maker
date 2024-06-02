@@ -89,6 +89,7 @@ function Player.__index:createStage(): Stage.Stage
   });
 
   stage:verifyID();
+  stage:updateMetadata(HttpService:JSONDecode(stage:toString()));
 
   -- Add this stage to the player's inventory.
   local stageInventoryKeyList = DataStore.Inventory:ListKeysAsync(`{self.ID}/stages`);

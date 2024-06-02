@@ -257,4 +257,18 @@ function Stage.__index:getBuildData(): StageBuildData
 
 end;
 
+function Stage.__index:toString(): string
+
+  local properties = {"ID", "permissionOverrides", "name", "timeCreated", "timeUpdated", "description", "isPublished", "members"}
+  local encodedData = {};
+  for _, property in ipairs(properties) do
+
+    encodedData[property] = self[property];
+
+  end;
+
+  return HttpService:JSONEncode(encodedData);
+
+end;
+
 return Stage;

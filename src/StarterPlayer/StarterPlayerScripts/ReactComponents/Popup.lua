@@ -4,9 +4,10 @@ local ScreenUIListLayout = require(script.Parent.ScreenUIListLayout);
 local ScreenUIPadding = require(script.Parent.ScreenUIPadding);
 local Button = require(script.Parent.Button);
 local Colors = require(ReplicatedStorage.Client.Colors);
+local ParagraphTextLabel = require(script.Parent.ParagraphTextLabel);
 
 type PopupProps = {
-  headerText: string?;
+  headingText: string?;
   taglineText: string?;
   options: {typeof(Button)}; 
   children: any;
@@ -33,7 +34,7 @@ local function Popup(props: PopupProps)
       Color = Colors.PopupBorder;
       Transparency = 0.6;
     });
-    Heading = React.createElement("Frame", {
+    Header = if props.headingText or props.taglineText then React.createElement("Frame", {
       BackgroundTransparency = 1;
       AutomaticSize = Enum.AutomaticSize.XY;
       Size = UDim2.new(0, 0, 0, 0);
@@ -43,29 +44,19 @@ local function Popup(props: PopupProps)
         Padding = UDim.new(0, 5);
         SortOrder = Enum.SortOrder.LayoutOrder;
       });
-      Header = if props.headerText then React.createElement("TextLabel", {
+      Heading = if props.headingText then React.createElement(ParagraphTextLabel, {
         LayoutOrder = 1;
-        Text = props.headerText;
-        BackgroundTransparency = 1;
+        text = props.headingText;
         TextColor3 = Colors.DemoDemonsRed;
-        AutomaticSize = Enum.AutomaticSize.XY;
-        TextSize = 20;
-        Size = UDim2.new(0, 0, 0, 0);
-        FontFace = Font.fromId(11702779517, Enum.FontWeight.Bold);
-        TextXAlignment = Enum.TextXAlignment.Left;
+        headingLevel = 1;
       }) else nil;
-      Tagline = if props.taglineText then React.createElement("TextLabel", {
+      Tagline = if props.taglineText then React.createElement(ParagraphTextLabel, {
         LayoutOrder = 2;
-        Text = props.taglineText;
-        TextSize = 16;
-        FontFace = Font.fromId(11702779517, Enum.FontWeight.SemiBold);
-        BackgroundTransparency = 1;
+        text = props.taglineText;
         TextColor3 = Colors.TaglineText;
-        Size = UDim2.new(0, 0, 0, 0);
-        AutomaticSize = Enum.AutomaticSize.XY;
-        TextXAlignment = Enum.TextXAlignment.Left;
+        headingLevel = 2;
       }) else nil;
-    });
+    }) else nil;
     Content = React.createElement("Frame", {
       BackgroundTransparency = 1;
       AutomaticSize = Enum.AutomaticSize.XY;
