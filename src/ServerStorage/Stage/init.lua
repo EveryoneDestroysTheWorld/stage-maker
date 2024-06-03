@@ -2,6 +2,7 @@
 -- Stage.lua
 -- Written by Christian "Sudobeast" Toney
 -- This module is a class that represents a stage.
+-- NOTE TO DEVELOPERS: This is a Roblox package, so remember to update it.
 
 local DataStoreService = game:GetService("DataStoreService");
 local DataStore = {
@@ -123,6 +124,36 @@ function Stage.new(properties: StageProperties): Stage
   
 end
 
+-- Returns a random Stage object from the published stages list.
+function Stage.random(): Stage
+
+  -- Get a random published ID.
+  local dataStorePages = DataStore.PublishedStages:GetSortedAsync(true, 100);
+  local publishedIDArrayList = {};
+  repeat 
+
+    local currentPage = dataStorePages:GetCurrentPage();
+    table.insert(publishedIDArrayList, currentPage);
+
+    if not dataStorePages.IsFinished then
+
+      dataStorePages:AdvanceToNextPageAsync();
+
+    end;
+
+  until dataStorePages.IsFinished;
+
+  -- Pick a random page.
+  local publishedIDArray = publishedIDArrayList[math.random(1, #publishedIDArrayList)];
+  
+  -- Pick a random stage ID.
+  local selectedStageID = publishedIDArray[math.random(1, #publishedIDArray)].key;
+
+  -- Return the stage.
+  return Stage.fromID(selectedStageID);
+
+end;
+
 -- Returns a new Stage object based on an ID.
 function Stage.fromID(id: string): Stage
   
@@ -238,71 +269,6 @@ function Stage.__index:delete(): ()
   
 end
 
--- Adds this stage's build data to the published stage index.
-function Stage.__index:publish(): ()
-
-  -- Verify that this stage isn't already published.
-  assert(not self.isPublished, "This stage is already published.");
-
-  -- Save the stage if this is the current stage.
-  if ServerScriptService.StageSaveScript.GetCurrentStage:Invoke() == self then
-
-    ServerScriptService.StageSaveScript.SaveStage:Invoke();
-
-  end;
-
-  -- Add this stage to the published stages list.
-  DataStore.PublishedStages:SetAsync(self.ID, DateTime.now().UnixTimestampMillis);
-
-  -- Mark this stage has published.
-  self:updateMetadata({isPublished = true});
-
-  print(`Successfully published Stage {self.ID}.`);
-
-end;
-
--- Removes this stage from the published stage index.
-function Stage.__index:unpublish(): ()
-
-  -- Verify that this stage is published.
-  assert(self.isPublished, "This stage is already unpublished.");
-
-  -- Remove this stage from the published stages list.
-  DataStore.PublishedStages:RemoveAsync(self.ID);
-
-  -- Mark this stage has unpublished.
-  self:updateMetadata({isPublished = false});
-
-  print(`Successfully unpublished Stage {self.ID}.`);
-
-end;
-
--- Returns this stage's build data.
-function Stage.__index:getBuildData(): StageBuildData
-
-  local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
-  local buildDataEncoded = {};
-  repeat
-
-    local keys = keyList:GetCurrentPage();
-    for _, key in ipairs(keys) do
-
-      table.insert(buildDataEncoded, HttpService:JSONDecode(DataStore.StageBuildData:GetAsync(key.KeyName)));
-  
-    end;
-
-    if not keyList.IsFinished then
-
-      keyList:AdvanceToNextPageAsync();
-
-    end;
-
-  until keyList.IsFinished;
-
-  return buildDataEncoded;
-
-end;
-
 function Stage.__index:download(): Model
 
   local stageModel = Instance.new("Model");
@@ -395,6 +361,71 @@ function Stage.__index:download(): Model
   end;
 
   return stageModel;
+
+end;
+
+-- Adds this stage's build data to the published stage index.
+function Stage.__index:publish(): ()
+
+  -- Verify that this stage isn't already published.
+  assert(not self.isPublished, "This stage is already published.");
+
+  -- Save the stage if this is the current stage.
+  if ServerScriptService.StageSaveScript.GetCurrentStage:Invoke() == self then
+
+    ServerScriptService.StageSaveScript.SaveStage:Invoke();
+
+  end;
+
+  -- Add this stage to the published stages list.
+  DataStore.PublishedStages:SetAsync(self.ID, DateTime.now().UnixTimestampMillis);
+
+  -- Mark this stage has published.
+  self:updateMetadata({isPublished = true});
+
+  print(`Successfully published Stage {self.ID}.`);
+
+end;
+
+-- Removes this stage from the published stage index.
+function Stage.__index:unpublish(): ()
+
+  -- Verify that this stage is published.
+  assert(self.isPublished, "This stage is already unpublished.");
+
+  -- Remove this stage from the published stages list.
+  DataStore.PublishedStages:RemoveAsync(self.ID);
+
+  -- Mark this stage has unpublished.
+  self:updateMetadata({isPublished = false});
+
+  print(`Successfully unpublished Stage {self.ID}.`);
+
+end;
+
+-- Returns this stage's build data.
+function Stage.__index:getBuildData(): StageBuildData
+
+  local keyList = DataStore.StageBuildData:ListKeysAsync(self.ID);
+  local buildDataEncoded = {};
+  repeat
+
+    local keys = keyList:GetCurrentPage();
+    for _, key in ipairs(keys) do
+
+      table.insert(buildDataEncoded, HttpService:JSONDecode(DataStore.StageBuildData:GetAsync(key.KeyName)));
+  
+    end;
+
+    if not keyList.IsFinished then
+
+      keyList:AdvanceToNextPageAsync();
+
+    end;
+
+  until keyList.IsFinished;
+
+  return buildDataEncoded;
 
 end;
 
