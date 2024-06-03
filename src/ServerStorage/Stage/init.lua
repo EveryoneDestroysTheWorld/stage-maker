@@ -65,6 +65,7 @@ type StageMethods = {
   updateBuildData: (self: Stage, newData: {string}) -> ();
   updateMetadata: (self: Stage, newData: UpdatableStageProperties) -> ();
   delete: (self: Stage) -> ();
+  download: (self: Stage) -> ();
   publish: (self: Stage) -> ();
   unpublish: (self: Stage) -> ();
   verifyID: (self: Stage) -> ();
@@ -81,6 +82,8 @@ type StageEvents = {
   
   -- Fires when the build data is partially updated. 
   onBuildDataUpdateProgressChanged: RBXScriptSignal;
+
+  onStageBuildDataDownloadProgressChanged: RBXScriptSignal;
   
   -- Fires when the stage is deleted.
   onDelete: RBXScriptSignal;
@@ -107,7 +110,7 @@ function Stage.new(properties: StageProperties): Stage
   
   local stage = properties;
 
-  for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete"}) do
+  for _, eventName in ipairs({"onMetadataUpdate", "onBuildDataUpdate", "onBuildDataUpdateProgressChanged", "onDelete", "onStageBuildDataDownloadProgressChanged"}) do
 
     events[eventName] = Instance.new("BindableEvent");
     stage[eventName] = events[eventName].Event;
@@ -297,6 +300,101 @@ function Stage.__index:getBuildData(): StageBuildData
   until keyList.IsFinished;
 
   return buildDataEncoded;
+
+end;
+
+function Stage.__index:download(): Model
+
+  local stageModel = Instance.new("Model");
+  local buildData = self:getBuildData();
+
+  -- Calculate the total parts.
+  local totalParts = 0;
+  for _, page in ipairs(buildData) do
+
+    for _, instance in ipairs(page) do
+
+      totalParts += 1;
+
+    end;
+
+  end;
+
+  -- Add the parts to the stage model.
+  local partsAudited = 0;
+  for _, page in ipairs(buildData) do
+
+    for _, instanceData in ipairs(page) do
+
+      local instance = Instance.new(instanceData.type) :: any;
+      instance.Anchored = true;
+      local function setEnum(enum, property, value)
+
+        for _, enumItem in ipairs(enum:GetEnumItems()) do
+
+          if enumItem.Value == value then
+            
+            instance[property] = enumItem;
+
+          end;
+
+        end;  
+
+      end;
+
+      for property, value in pairs(instanceData.properties) do
+
+        local enumProperties = {
+          Material = Enum.Material;
+          Shape = Enum.PartType;
+          BackSurface = Enum.SurfaceType;
+          BottomSurface = Enum.SurfaceType;
+          FrontSurface = Enum.SurfaceType;
+          LeftSurface = Enum.SurfaceType;
+          RightSurface = Enum.SurfaceType;
+          TopSurface = Enum.SurfaceType;
+        }
+
+        if property == "Color" then
+
+          instance[property] = Color3.fromHex(value);
+
+        elseif ({Size = 1; Position = 1; Orientation = 1})[property] then
+
+          instance[property] = Vector3.new(value.X, value.Y, value.Z);
+
+        elseif enumProperties[property] then
+
+          setEnum(enumProperties[property], property, value);
+
+        elseif ({Transparency = 1; Reflectance = 1; Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
+
+          instance[property] = value;
+
+        else
+
+          warn(`Unknown property: {property}`);
+
+        end;
+
+      end;
+
+      for attribute, value in pairs(instanceData.attributes) do
+
+        instance:SetAttribute(attribute, value);
+
+      end;
+
+      instance.Parent = stageModel;
+
+      partsAudited += 1;
+      events.onStageBuildDataDownloadProgressChanged:Fire(partsAudited, totalParts);
+
+    end;
+
+  end;
+
+  return stageModel;
 
 end;
 

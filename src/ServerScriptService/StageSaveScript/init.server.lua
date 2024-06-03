@@ -209,95 +209,22 @@ ReplicatedStorage.Shared.Functions.SetStage.OnServerInvoke = function(player, st
     -- Get the stage from the DataStore.
     ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player, stageID);
     currentStage = Stage.fromID(stageID);
-    local stageBuildData = currentStage:getBuildData();
 
-    -- Calculate the total parts.
-    local totalParts = 0;
-    for _, page in ipairs(stageBuildData) do
-
-      for _, instance in ipairs(page) do
-
-        totalParts += 1;
-
-      end;
-
-    end;
-
-    -- Add the parts to the stage model.
-    local partsAudited = 0;
-    for _, page in ipairs(stageBuildData) do
-
-      for _, instanceData in ipairs(page) do
-
-        local instance = Instance.new(instanceData.type) :: any;
-        instance.Anchored = true;
-        local function setEnum(enum, property, value)
-
-          for _, enumItem in ipairs(enum:GetEnumItems()) do
-
-            if enumItem.Value == value then
-              
-              instance[property] = enumItem;
-
-            end;
-
-          end;  
-
-        end;
-
-        for property, value in pairs(instanceData.properties) do
-
-          local enumProperties = {
-            Material = Enum.Material;
-            Shape = Enum.PartType;
-            BackSurface = Enum.SurfaceType;
-            BottomSurface = Enum.SurfaceType;
-            FrontSurface = Enum.SurfaceType;
-            LeftSurface = Enum.SurfaceType;
-            RightSurface = Enum.SurfaceType;
-            TopSurface = Enum.SurfaceType;
-          }
-
-          if property == "Color" then
-
-            instance[property] = Color3.fromHex(value);
-
-          elseif ({Size = 1; Position = 1; Orientation = 1})[property] then
-
-            instance[property] = Vector3.new(value.X, value.Y, value.Z);
-
-          elseif enumProperties[property] then
-
-            setEnum(enumProperties[property], property, value);
-
-          elseif ({Transparency = 1; Reflectance = 1; Name = 1; CastShadow = 1; Anchored = 1; CanCollide = 1;})[property] then
-
-            instance[property] = value;
-
-          else
-
-            warn(`Unknown property: {property}`);
-
-          end;
-
-        end;
-
-        for attribute, value in pairs(instanceData.attributes) do
-
-          instance:SetAttribute(attribute, value);
-
-        end;
-
-        instance.Parent = workspace.Stage;
-
-        partsAudited += 1;
-        ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
-
-      end;
-
-    end;
-
+    local downloadProgressChangedEvent = currentStage.onStageBuildDataDownloadProgressChanged:Connect(function(partsAudited, totalParts)
     
+      ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
+
+    end);
+    local stageModel = currentStage:download();
+    downloadProgressChangedEvent:Disconnect();
+    
+    for _, instance in ipairs(stageModel:GetChildren()) do
+
+      instance.Parent = workspace.Stage;
+
+    end;
+    stageModel:Destroy();
+
     ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients(stageID);
   end;
 
