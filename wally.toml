@@ -1,5 +1,5 @@
 [package]
-name = "christian/stage-maker"
+name = "DemoDemons/stage-maker"
 version = "0.1.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
