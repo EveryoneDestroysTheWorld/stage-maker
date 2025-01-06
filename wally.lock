@@ -3,9 +3,19 @@
 registry = "test"
 
 [[package]]
-name = "christian/stage-maker"
+name = "christian-toney/edtw-profile"
+version = "1.0.2"
+dependencies = []
+
+[[package]]
+name = "christian-toney/edtw-stage"
+version = "1.0.7"
+dependencies = []
+
+[[package]]
+name = "everyondestroystheworld/stage-maker"
 version = "0.1.0"
-dependencies = [["react", "jsdotlua/react@17.1.0"], ["react-roblox", "jsdotlua/react-roblox@17.1.0"]]
+dependencies = [["react", "jsdotlua/react@17.1.0"], ["react-roblox", "jsdotlua/react-roblox@17.1.0"], ["Profile", "christian-toney/edtw-profile@1.0.2"], ["Stage", "christian-toney/edtw-stage@1.0.7"]]
 
 [[package]]
 name = "jsdotlua/boolean"

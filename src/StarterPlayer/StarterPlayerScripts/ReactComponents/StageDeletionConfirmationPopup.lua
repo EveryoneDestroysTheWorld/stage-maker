@@ -17,7 +17,7 @@ local function StageDeletionConfirmationPopup(props: StageDeletionConfirmationPo
   
     if isDeletingStage then
 
-      ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(props.stage.ID);
+      ReplicatedStorage.Shared.Functions.DeleteStage:InvokeServer(props.stage.id);
       props.onClose();
 
     end;

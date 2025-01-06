@@ -45,7 +45,7 @@ local function StagesScreen(props: StageScreenProps)
     
       for stageIndex, stage in ipairs(stages) do
 
-        if stage.ID == stageID then
+        if stage.id == stageID then
 
           -- Remove the stage from the list.
           createNewStageList();
@@ -63,13 +63,13 @@ local function StagesScreen(props: StageScreenProps)
 
       for stageIndex, stage in ipairs(stages) do
 
-        if selectedStage and selectedStage.ID == stageID then
+        if selectedStage and selectedStage.id == stageID then
 
           setSelectedStage(newStageData);
 
         end;
 
-        if stage.ID == stageID then
+        if stage.id == stageID then
 
           createNewStageList();
           stages[stageIndex] = newStageData;
@@ -101,7 +101,7 @@ local function StagesScreen(props: StageScreenProps)
         LayoutOrder = 1;
         onActivate = function() 
         
-          ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((selectedStage or {}).ID);
+          ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((selectedStage or {}).id);
           
           if not selectedStage then
 
@@ -244,7 +244,7 @@ local function StagesScreen(props: StageScreenProps)
       end;
       onStageConfirm = function(stage)
 
-        ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((stage or {}).ID);
+        ReplicatedStorage.Shared.Functions.SetStage:InvokeServer((stage or {}).id);
 
         if not stage then
 

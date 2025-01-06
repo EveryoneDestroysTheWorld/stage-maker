@@ -17,7 +17,7 @@ local function StageUnpublishConfirmationPopup(props: StageUnpublishConfirmation
   
     if isUnpublishingStage then
 
-      ReplicatedStorage.Shared.Functions.UnpublishStage:InvokeServer(props.stage.ID);
+      ReplicatedStorage.Shared.Functions.UnpublishStage:InvokeServer(props.stage.id);
       props.onClose();
 
     end;

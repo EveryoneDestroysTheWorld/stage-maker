@@ -7,24 +7,65 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local ServerStorage = game:GetService("ServerStorage");
 local HttpService = game:GetService("HttpService");
 local ServerScriptService = game:GetService("ServerScriptService");
+local DataStoreService = game:GetService("DataStoreService");
 
-local Player = require(ServerStorage.Player);
-local Stage = require(ServerStorage.Stage);
+local Stage = require(ServerStorage.Packages.Stage);
 
 local isSaving = false;
 
-local currentStage = nil;
+local currentStage: Stage.Stage? = nil;
 
-local function getCurrentStage(player)
+local function getCurrentStage(player: Player): Stage.Stage
 
   if not currentStage then
 
     print("[Saving] Current stage not found. Creating a new one.");
-    currentStage = Player.fromID(player.UserId, true):createStage();
+
+    local playerID = player.UserId;
+    local timeCreated = DateTime.now().UnixTimestampMillis;
+    local stage = Stage.new({
+      id = Stage:generateID();
+      name = "Unnamed Stage";
+      timeUpdated = timeCreated;
+      timeCreated = timeCreated;
+      description = "";
+      isPublished = false;
+      permissionOverrides = {};
+      members = {
+        {
+          id = playerID;
+          role = "Admin" :: "Admin";
+        }
+      };
+    });
+
+    stage:updateMetadata(HttpService:JSONDecode(stage:toString()));
+
+    -- Add this stage to the player's inventory.
+    local datastore = DataStoreService:GetDataStore("Inventory");
+    local stageInventoryKeyList = datastore:ListKeysAsync(`{playerID}/stages`);
+    while not stageInventoryKeyList.IsFinished do
+
+      stageInventoryKeyList:AdvanceToNextPageAsync();
+
+    end;
+    local latestKeys = stageInventoryKeyList:GetCurrentPage();
+    local latestKey = (latestKeys[#latestKeys] or {KeyName = `{playerID}/stages/1`}).KeyName;
+    datastore:UpdateAsync(latestKey, function(encodedStageIDs)
+      
+      local stageIDs = HttpService:JSONDecode(encodedStageIDs or "{}");
+      table.insert(stageIDs, stage.id);
+      return HttpService:JSONEncode(stageIDs);
+
+    end);
+
+    -- Notify the player if they're here.
+    ReplicatedStorage.Shared.Events.StageAdded:FireClient(player, stage);
+    currentStage = stage;
 
   end;
 
-  return currentStage;
+  return currentStage :: Stage.Stage;
 
 end;
 
@@ -40,7 +81,7 @@ ReplicatedStorage.Shared.Functions.GetStages.OnServerInvoke = function(player)
 
   local success, message = pcall(function()
   
-    stages = Player.fromID(player.UserId):getStages();
+    stages = Stage.listFromOwnerID(player.UserId);
 
   end);
 
@@ -70,7 +111,7 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
     
     -- Get the current stage info.
     local stage = getCurrentStage(player);
-    print(`[Saving] Stage ID: {stage.ID}`);
+    print(`[Saving] Stage ID: {stage.id}`);
     local stageBuild: Model? = workspace:FindFirstChild("Stage");
     assert(stageBuild and stageBuild:IsA("Model"), "Couldn't find Stage the Workspace.");
 
@@ -152,7 +193,7 @@ ReplicatedStorage.Shared.Functions.SaveStageBuildData.OnServerInvoke = function(
 
     -- Save the stage into a DataStore.
     local onBuildDataUpdateProgressChanged;
-    onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged:Connect(function(current, total)
+    onBuildDataUpdateProgressChanged = stage.onBuildDataUpdateProgressChanged.Event:Connect(function(current, total)
 
       ReplicatedStorage.Shared.Events.StageBuildDataSaveProgressChanged:FireAllClients(2, current, total);
 
@@ -208,14 +249,14 @@ ReplicatedStorage.Shared.Functions.SetStage.OnServerInvoke = function(player, st
 
     -- Get the stage from the DataStore.
     ReplicatedStorage.Shared.Events.StageBuildDataDownloadStarted:FireAllClients(player, stageID);
-    currentStage = Stage.fromID(stageID);
+    local stage = Stage.fromID(stageID);
 
-    local downloadProgressChangedEvent = currentStage.onStageBuildDataDownloadProgressChanged:Connect(function(partsAudited, totalParts)
+    local downloadProgressChangedEvent = stage.onStageBuildDataDownloadProgressChanged.Event:Connect(function(partsAudited, totalParts)
     
       ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged:FireAllClients(stageID, partsAudited, totalParts);
 
     end);
-    local stageModel = currentStage:download();
+    local stageModel = stage:download();
     downloadProgressChangedEvent:Disconnect();
     
     for _, instance in ipairs(stageModel:GetChildren()) do
@@ -226,6 +267,7 @@ ReplicatedStorage.Shared.Functions.SetStage.OnServerInvoke = function(player, st
     stageModel:Destroy();
 
     ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted:FireAllClients(stageID);
+    currentStage = stage;
   end;
 
   -- Reset the status so that we can download more stages.
@@ -239,7 +281,7 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
   assert(typeof(stageID) == "string", "Stage ID must be a string.");
 
   -- Lock editing on this stage.
-  local isPublishingCurrentStage = if currentStage then currentStage.ID == stageID else false;
+  local isPublishingCurrentStage = if currentStage then currentStage.id == stageID else false;
   if isPublishingCurrentStage then
 
     ServerScriptService.PartManagementScript.ToggleBuildingTools:Invoke(false);
@@ -247,10 +289,11 @@ ReplicatedStorage.Shared.Functions.PublishStage.OnServerInvoke = function(player
   end;
 
   -- Find and publish the stage.
-  local stage = if isPublishingCurrentStage then currentStage else Stage.fromID(stageID); 
+  local stage = if isPublishingCurrentStage then currentStage else Stage.fromID(stageID);
+  assert(stage);
   local isStagePublished, errorMessage = pcall(function()
   
-    print(`Publishing Stage {stageID}...`);
+    print(`Publishing Stage {stage.id}...`);
     stage:publish();
     ReplicatedStorage.Shared.Events.StageUpdated:FireAllClients(stageID, stage);
 
@@ -276,8 +319,9 @@ ReplicatedStorage.Shared.Functions.UnpublishStage.OnServerInvoke = function(play
   assert(typeof(stageID) == "string", "Stage ID must be a string.");
 
   -- Find and publish the stage.
-  local isUnpublishingCurrentStage = if currentStage then currentStage.ID == stageID else false;
+  local isUnpublishingCurrentStage = if currentStage then currentStage.id == stageID else false;
   local stage = if isUnpublishingCurrentStage then currentStage else Stage.fromID(stageID); 
+  assert(stage);
   local isStageUnpublished, errorMessage = pcall(function()
   
     print(`Publishing Stage {stageID}...`);

@@ -1,6 +1,5 @@
 {
-  "name": "DemoDemons (Staging): Stage Maker",
-  "servePlaceIds": [17474086074],
+  "name": "Everyone Destroys the World (Dev): Stage Maker",
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
@@ -19,6 +18,9 @@
     },
     "ServerStorage": {
       "$path": "src/ServerStorage",
+      "Packages": {
+        "$path": "ServerPackages"
+      },
       "$ignoreUnknownInstances": true
     },
     "StarterPlayer": {

@@ -19,7 +19,7 @@ local function StageButton(props: StageButtonProps)
   
     local downloadProgressEvent = ReplicatedStorage.Shared.Events.StageBuildDataDownloadProgressChanged.OnClientEvent:Connect(function(stageID, partsDownloaded, totalParts)
     
-      if stageID == props.stage.ID then
+      if stageID == props.stage.id then
 
         setDownloadProgress(partsDownloaded / totalParts);
 
@@ -29,7 +29,7 @@ local function StageButton(props: StageButtonProps)
 
     local downloadCompleteEvent = ReplicatedStorage.Shared.Events.StageBuildDataDownloadCompleted.OnClientEvent:Connect(function(stageID)
     
-      if stageID == props.stage.ID then
+      if stageID == props.stage.id then
 
         setDownloadProgress(nil);
         props.onDownloadComplete();

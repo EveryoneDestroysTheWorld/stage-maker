@@ -1,0 +1,46 @@
+{
+  "name": "Everyone Destroys the World (Staging): Stage Maker",
+  "servePlaceIds": [17474086074],
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Client": {
+        "$path": "src/ReplicatedStorage/Client"
+      },
+      "Shared": {
+        "$path": "src/ReplicatedStorage/Shared",
+        "Packages": {
+          "$path": "Packages"
+        }
+      }
+    },
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "ServerStorage": {
+      "$path": "src/ServerStorage",
+      "Packages": {
+        "$path": "ServerPackages"
+      },
+      "$ignoreUnknownInstances": true
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      },
+      "StarterCharacterScripts": {
+        "$path": "src/StarterPlayer/StarterCharacterScripts",
+        "$className": "StarterCharacterScripts"
+      }
+    },
+    "StarterGui": {
+      "$path": "src/StarterGui",
+      "$ignoreUnknownInstances": true
+    },
+    "TextChatService": {
+      "Commands": {
+        "$path": "src/TextChatService/Commands"
+      }
+    }
+  }
+}

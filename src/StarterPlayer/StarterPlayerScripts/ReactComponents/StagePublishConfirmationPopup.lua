@@ -17,7 +17,7 @@ local function StagePublishConfirmationPopup(props: StagePublishConfirmationPopu
   
     if isPublishingStage then
 
-      ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(props.stage.ID);
+      ReplicatedStorage.Shared.Functions.PublishStage:InvokeServer(props.stage.id);
       props.onClose();
 
     end;
