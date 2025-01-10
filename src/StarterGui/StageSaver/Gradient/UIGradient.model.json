@@ -1,0 +1,36 @@
+{
+  "className": "UIGradient",
+  "properties": {
+    "Color": {
+      "ColorSequence": {
+        "keypoints": [
+          {
+            "time": 0,
+            "color": [0.196078, 0.196078, 0.196078]
+          },
+          {
+            "time": 1,
+            "color": [0.47451, 0.47451, 0.47451]
+          }      
+        ]
+      }
+    },
+    "Rotation": -90,
+    "Transparency": {
+      "NumberSequence": {
+        "keypoints": [
+          {
+            "time": 0,
+            "value": 0,
+            "envelope": 0
+          },
+          {
+            "time": 1,
+            "value": 1,
+            "envelope": 0
+          }      
+        ]
+      }
+    }
+  }
+}

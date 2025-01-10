@@ -1,0 +1,27 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<Meta name="ExplicitAutoJoints">true</Meta>
+	<External>null</External>
+	<External>nil</External>
+	<Item class="UIListLayout" referent="RBX37690C827902450DA8F0A65EAFAD94FB">
+		<Properties>
+			<BinaryString name="AttributesSerialize"></BinaryString>
+			<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+			<bool name="DefinesCapabilities">false</bool>
+			<token name="FillDirection">1</token>
+			<token name="HorizontalAlignment">2</token>
+			<token name="HorizontalFlex">0</token>
+			<token name="ItemLineAlignment">0</token>
+			<string name="Name">UIListLayout</string>
+			<UDim name="Padding">
+				<S>0</S>
+				<O>5</O>
+			</UDim>
+			<token name="SortOrder">2</token>
+			<int64 name="SourceAssetId">-1</int64>
+			<BinaryString name="Tags"></BinaryString>
+			<token name="VerticalAlignment">1</token>
+			<token name="VerticalFlex">0</token>
+			<bool name="Wraps">false</bool>
+		</Properties>
+	</Item>
+</roblox>

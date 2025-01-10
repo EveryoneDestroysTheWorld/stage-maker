@@ -1,4 +1,15 @@
 {
   "className": "CanvasGroup",
-  "ignoreUnknownInstances": true
+  "ignoreUnknownInstances": true,
+  "properties": {
+    "GroupTransparency": 1,
+    "BackgroundTransparency": 0.7,
+    "BorderSizePixel": 0,
+    "Position": {
+      "UDim2": [[0, 0], [1, -100]]
+    },
+    "Size": {
+      "UDim2": [[1, 0], [0, 100]]
+    }
+  }
 }
