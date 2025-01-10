@@ -1,7 +1,7 @@
-# DemoDemons: Stage Maker
+# Everyone Destroys the World: Stage Maker
 ## Acknowledgments
-### DemoDemons Team
-* Christian "Sudobeast" Toney - Programmer
+### Everyone Destroys the World Group
+* Christian Toney (Christian_Toney) - Programmer
 
 ### Third-party library developers
 #### google/material-design-icons
