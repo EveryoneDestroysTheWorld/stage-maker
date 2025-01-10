@@ -5,7 +5,7 @@ local TextChatService = game:GetService("TextChatService");
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
-local Window = require(script.Parent.Parent.ReactComponents.Window);
+local Window = require(script.Parent.Parent:WaitForChild("ReactComponents").Window);
 local ActionHistoryEventList = require(script.Parent.Parent.ReactComponents.ActionHistoryEventList);
 
 local handle = Instance.new("ScreenGui");

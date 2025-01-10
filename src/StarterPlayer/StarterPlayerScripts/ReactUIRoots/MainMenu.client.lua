@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
-local ReactComponents = script.Parent.Parent.ReactComponents;
+local ReactComponents = script.Parent.Parent:WaitForChild("ReactComponents");
 local StagesScreen = require(ReactComponents.StagesScreen);
 local TweenService = game:GetService("TweenService");
 local Lighting = game:GetService("Lighting");
@@ -25,12 +25,6 @@ local root = ReactRoblox.createRoot(handle);
 
 local function MainMenuContainer()
 
-  React.useEffect(function()
-  
-    TweenService:Create(Lighting.Blur, TweenInfo.new(), {Size = 8}):Play();
-
-  end, {});
-
   return React.createElement(React.StrictMode, {}, {
     Screen = React.createElement(StagesScreen, {
       onStageDownloaded = function()
@@ -41,7 +35,10 @@ local function MainMenuContainer()
         handle.Enabled = false;
 
       end;
-    });
+    }),
+    Blur = ReactRoblox.createPortal(React.createElement("BlurEffect", {
+      Size = 8
+    }), Lighting)
   });
   
 end;

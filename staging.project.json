@@ -4,7 +4,14 @@
   "tree": {
     "$className": "DataModel",
     "Workspace": {
-      "$path": "src/Workspace"
+      "$path": "src/Workspace",
+      "$ignoreUnknownInstances": true
+    },
+    "Lighting": {
+      "$path": "src/Lighting",
+      "$properties": {
+        "Technology": "ShadowMap"
+      }
     },
     "ReplicatedStorage": {
       "Client": {
@@ -17,6 +24,11 @@
         }
       }
     },
+    "Players": {
+      "$properties": {
+        "CharacterAutoLoads": false
+      }
+    },
     "ServerScriptService": {
       "$path": "src/ServerScriptService"
     },
@@ -24,8 +36,7 @@
       "$path": "src/ServerStorage",
       "Packages": {
         "$path": "ServerPackages"
-      },
-      "$ignoreUnknownInstances": true
+      }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
@@ -37,12 +48,14 @@
       }
     },
     "StarterGui": {
-      "$path": "src/StarterGui",
-      "$ignoreUnknownInstances": true
+      "$path": "src/StarterGui"
     },
     "TextChatService": {
-      "Commands": {
-        "$path": "src/TextChatService/Commands"
+      "$path": "src/TextChatService",
+      "$ignoreUnknownInstances": true,
+      "$properties": {
+        "ChatTranslationEnabled": true,
+        "ChatVersion": "TextChatService"
       }
     }
   }

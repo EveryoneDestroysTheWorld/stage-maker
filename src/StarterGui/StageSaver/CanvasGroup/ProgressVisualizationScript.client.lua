@@ -10,8 +10,6 @@ local savingTextLabel = script.Parent.SavingText;
 local saveCompletedTextLabel = script.Parent.SaveCompletedText;
 local nothingSavedTextLabel = script.Parent.NothingSavedText;
 
-script.Parent.GroupTransparency = 1;
-
 local saveStartTime;
 
 local lastTotal = 0;

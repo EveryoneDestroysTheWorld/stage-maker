@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage");
 local React = require(ReplicatedStorage.Shared.Packages.react);
 local ReactRoblox = require(ReplicatedStorage.Shared.Packages["react-roblox"]);
 local player = game:GetService("Players").LocalPlayer;
-local ReactComponents = script.Parent.Parent.ReactComponents;
+local ReactComponents = script.Parent.Parent:WaitForChild("ReactComponents");
 local StageUnpublishConfirmationPopup = require(ReactComponents.StageUnpublishConfirmationPopup);
 
 local handle = Instance.new("ScreenGui");
