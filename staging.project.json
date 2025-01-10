@@ -10,7 +10,15 @@
     "Lighting": {
       "$path": "src/Lighting",
       "$properties": {
-        "Technology": "ShadowMap"
+        "Technology": "ShadowMap",
+        "Ambient": [0.27451, 0.27451, 0.27451],
+        "Brightness": 3,
+        "GlobalShadows": true,
+        "EnvironmentDiffuseScale": 1,
+        "EnvironmentSpecularScale": 1,
+        "OutdoorAmbient": [0.27451, 0.27451, 0.27451],
+        "ShadowSoftness": 0.2,
+        "ClockTime": 14.5
       }
     },
     "ReplicatedStorage": {
